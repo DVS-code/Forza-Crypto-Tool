@@ -30,7 +30,7 @@ Version **2.1.0**.
 | Save Swap | 🔒 Coming Soon
 | Profile Editor | 🔒 Coming Soon
 
-### Method 22 notes
+## Method 22 notes
 
 - **Single-chunk entries** decrypt fully and produce valid, inflated asset files
   (verified byte-for-byte against the game's own decrypted output).
