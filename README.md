@@ -2,8 +2,6 @@
 
 Windows toolkit for Forza Horizon 6 asset and save crypto.
 
-Version **2.1.0**.
-
 ## Tabs
 
 - **Dashboard** — drop a file; it auto-detects the type and offers the right action.
