@@ -24,8 +24,8 @@ Version **2.1.0**.
 
 | Feature | Status |
 |---|---|
-| **Method 22 asset decryption** | ✅ Working (AES-256-CBC, single-chunk entries) |
-| GameDB decrypt / re-encrypt | ✅ Working (server-side) |
+| **Method 22 asset decryption** | ✅ Working |
+| GameDB decrypt / re-encrypt | ✅ Working |
 | Profile (`C_ProfileData`)  | 🔒 Coming Soon
 | Save Swap | 🔒 Coming Soon
 | Profile Editor | 🔒 Coming Soon
