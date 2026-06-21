@@ -48,14 +48,18 @@ configured backend endpoint + app key are required for those operations (see
   **IV Captures** folder next to the app.
 
 - **Save Swap** — swap a **donor** `C_ProfileData` onto your **active** account. You
-  provide the donor save + its IV table, your active save + its IV table (from Create
-  Save), and the target XUID (grab it from the Xbox App). The tool decrypts the donor,
-  rewrites the embedded XUID to your account, re-encrypts under your active account's IV
-  table, backs up your current save, and writes the swap — restoring the backup
-  automatically if anything fails.
+  provide the donor save + its IV table (from Create Save), your active save (the file
+  the game loads — it's overwritten), and the target XUID (grab it from the Xbox App).
+  The tool decrypts the donor, rewrites only the single account-identity XUID to your
+  account (leaving all garage/progression data untouched), re-encrypts under the donor's
+  own IV table — so **any donor size works** — backs up your current save, and writes the
+  swap, restoring the backup automatically if anything fails. **No active IV capture
+  needed.**
 
 - **Profile Editor** — decrypt a `C_ProfileData` to its plaintext (with its IV table),
-  edit the embedded XUID, and re-encrypt it back into a loadable save.
+  edit the embedded **XUID** and **double-click any editable property** (TotalCredits,
+  TotalXP, TotalSkills, difficulty/assist settings, and 150+ more) to change it in place,
+  then re-encrypt back into a loadable save.
 
 ## What's actually working
 
@@ -81,9 +85,8 @@ store in the file**. They can only be recovered by capturing them from the runni
   between capturing and using a save. (The tool snapshots the profile *before* launching the
   game to survive an autosave during the capture window, and it auto-closes FH6 on a
   successful capture — but don't relaunch and play before you've used the capture.)
-- For a **Save Swap**, the active IV table must be captured from a save of comparable size
-  to the edited result. If the edited profile needs more chunks than you captured, re-capture
-  against the current save and try again.
+- A **Save Swap** only needs the **donor's** IV table — the swap re-encrypts under the
+  donor's own IVs, so **any donor size works** and no active-save IV capture is required.
 - IV capture supports the current Steam build (`6.379.939.0`) and the earlier pre-release
   build (`6.353.145.0`), auto-detecting which one is running. A later game update may need
   the IV tool refreshed.
