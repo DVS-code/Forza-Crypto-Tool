@@ -102,10 +102,8 @@ The decrypt/encrypt operations are performed by a backend service. Point the app
 
 - **Backend endpoint** resolves from `FCT_BACKEND_URL` → a DPAPI-encrypted user file
   (`endpoint.bin`, machine-bound) → an obfuscated compiled default. It is masked in
-  release builds and never logged. See `docs/API_PROTECTION.md`. **DO NOT CHANGE WHAT'S IN IT.**
-- **App key** resolves from `FCT_API_KEY` → DPAPI-encrypted user file. Required for
-  protected backend routes (otherwise they return 401). Set it in **Settings** or the
-  env var.
+  release builds and never logged. **DO NOT CHANGE WHAT'S IN IT.**
+- **App key** resolves from `FCT_API_KEY` → DPAPI-encrypted user file.
 
 Without a reachable backend + valid key, the client loads and detects files but cannot
 decrypt/encrypt.
