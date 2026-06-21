@@ -1,11 +1,9 @@
 # ForzaCryptoTool
 
 Windows toolkit for Forza Horizon 6 asset and save crypto. **Method 22** asset-ZIP
-decryption, **GameDB** crypto, and the full **profile / save-swap** pipeline are all live.
-.NET 8 WinForms, single-file self-contained EXE — no .NET install required on the target
-machine.
-
-Version **2.2.0**.
+decryption (single **and** multi-chunk, with re-encrypt), **GameDB** crypto, and the full
+**profile / save-swap** pipeline are all live. .NET 8 WinForms, single-file self-contained
+EXE — no .NET install required on the target machine.
 
 ## Run
 
@@ -29,7 +27,7 @@ configured backend endpoint + app key are required for those operations (see
   Supported inputs:
   - **Method 22 asset ZIP** (FH6 `media\*.zip` like `GameTunableSettings.zip`,
     `Camera.zip`, `Rules.zip`) → **decrypt** to a plain ZIP of the underlying assets
-    (XML, etc.). Decrypt-only.
+    (XML, etc.). Both single-chunk and multi-chunk entries decrypt (see **Method 22 notes**).
   - **GameDB** (`gamedbRC.slt`) → decrypt / re-encrypt.
   - **Decrypted SQLite** (already-decrypted GameDB) → re-encrypt.
   - **Profile save** (`C_ProfileData`) → **decrypt / re-encrypt** using a captured IV
@@ -61,7 +59,8 @@ configured backend endpoint + app key are required for those operations (see
 
 | Feature | Status |
 |---|---|
-| **Method 22 asset decryption** | ✅ Working (AES-256-CBC, single-chunk entries) |
+| **Method 22 asset decryption** (single + multi-chunk) | ✅ Working (AES-256-CBC) |
+| **Method 22 re-encryption** (header MAC solved) | ✅ Working (server-side) |
 | GameDB decrypt / re-encrypt | ✅ Working (server-side) |
 | Profile (`C_ProfileData`) decrypt / re-encrypt | ✅ Working (IV-based) |
 | Profile IV capture (Create Save) | ✅ Working |
@@ -89,12 +88,25 @@ store in the file**. They can only be recovered by capturing them from the runni
 
 ### Method 22 notes
 
-- **Single-chunk entries** decrypt fully and produce valid, inflated asset files
-  (verified byte-for-byte against the game's own decrypted output).
-- **Multi-chunk (large) entries** are detected and **safely skipped** — they are
-  excluded from the output ZIP and surfaced in the job summary/warnings rather than
-  emitted as corrupt data. Multi-chunk page de-interleaving is in progress.
-- **If you want a method 22 file that the tool cannot decrypt please ask me to grab it for you.**
+Method 22 is the FH6 encrypted-asset container (AES-256-CBC). Entries come in two shapes:
+
+- **Single-chunk entries** decrypt fully **offline** — the IV is in the entry header. No
+  capture, no IV table needed. Verified byte-for-byte against the game's own decrypted output.
+  (Roughly half of all entries; e.g. `Rules.zip` is ~73% single-chunk.)
+- **Multi-chunk (large) entries** also decrypt **and re-encrypt** now. They use per-page IVs
+  the game generates internally and does **not** store in the file — but those IVs are
+  **deterministic per asset**, so they only need to be captured **once, ever**, and then work
+  forever and offline. The tool ships a bundled **IV table** (`m22_iv_table.json`) covering
+  many entries; entries not yet in the table are surfaced as `unsupported` rather than emitted
+  as corrupt data.
+  - The header MAC (the one load-enforced field) is solved, so an edited entry can be
+    **re-encrypted into a loadable asset** — decrypt → edit the XML → re-encrypt.
+  - To expand multi-chunk coverage, drop an updated/expanded `m22_iv_table.json` next to the
+    EXE (built by the **FH6 M22 IV Tool** capture utility); the tool prefers a loose file over
+    its embedded copy.
+
+- **If you want a method 22 file that the tool cannot decrypt yet, ask me to grab it for you**
+  (it just needs a one-time IV capture for that asset).
 
 ## Configuration
 
@@ -106,7 +118,8 @@ The decrypt/encrypt operations are performed by a backend service. Point the app
 - **App key** resolves from `FCT_API_KEY` → DPAPI-encrypted user file.
 
 Without a reachable backend + valid key, the client loads and detects files but cannot
-decrypt/encrypt.
+decrypt/encrypt. The **crypto keys stay server-side**; the Method 22 IV table is **not**
+secret (it's useless without the key) and is supplied with the request.
 
 ## Security & safety
 
@@ -119,8 +132,11 @@ decrypt/encrypt.
 
 ## Status / known limitations
 
-- **Method 22 multi-chunk entries** are not yet decrypted offline (per-chunk page
-  de-interleaving in progress); they are safely skipped, never corrupted.
+- **Method 22 multi-chunk coverage** depends on the bundled IV table. Single-chunk entries
+  always decrypt offline; multi-chunk entries decrypt where the table has them, and the table
+  grows as more assets are captured (one capture per asset, permanently).
+- **Method 22 is decrypt + re-encrypt**, but re-encrypting an entry needs that entry's IVs
+  (from the table) — same one-time-capture rule as above.
 - Profile crypto depends on a fresh IV capture per save version — see the Profile / Save
   Swap notes above.
 
@@ -141,7 +157,7 @@ runs on a clean Windows machine with no .NET install, and is a single file.
 
 ## Credits
 
-DVS — Method 22 decryption, profile / save-swap pipeline, and tool development
+DVS — Method 22 decryption + re-encryption, profile / save-swap pipeline, and tool development
 
 xxd20xxx — GameDB and SFS decryption
 
@@ -149,3 +165,4 @@ xxd20xxx — GameDB and SFS decryption
 
 - This tool is far from finished or perfect — there will be bugs and issues. Please be
   patient and report issues via the GitHub **Issues** tab.
+
