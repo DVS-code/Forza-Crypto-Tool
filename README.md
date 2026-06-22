@@ -41,10 +41,9 @@ configured backend endpoint + app key are required for those operations (see
   provide the donor save + its IV table (from Create Save), your active save (the file
   the game loads — it's overwritten), and the target XUID (grab it from the Xbox App).
   The tool decrypts the donor, rewrites only the single account-identity XUID to your
-  account (leaving all garage/progression data untouched), re-encrypts under the donor's
-  own IV table — so **any donor size works** — backs up your current save, and writes the
-  swap, restoring the backup automatically if anything fails. **No active IV capture
-  needed.**
+  account, re-encrypts under the donor's own IV table — so **any donor size works**
+  backs up your current save, and writes the swap, restoring the backup automatically 
+  if anything fails. **No active IV capture needed.**
 
 - **Profile Editor** — decrypt a `C_ProfileData` to its plaintext (with its IV table),
   edit the embedded **XUID** and **double-click any editable property** (TotalCredits,
