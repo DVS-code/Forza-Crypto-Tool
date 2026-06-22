@@ -1,157 +1,110 @@
 # ForzaCryptoTool
 
-Windows toolkit for Forza Horizon 6 asset and save crypto. **Method 22** asset-ZIP
-decryption **and re-encryption** (single **and** multi-chunk), **GameDB** crypto, and the
-full **profile / save-swap** pipeline are all live. .NET 8 WinForms, single-file
-self-contained EXE — no .NET install required on the target machine.
+Windows toolkit for Forza Horizon 6 asset, GameDB, and profile save crypto.
 
-## Backend Note:
+Built with .NET 8 WinForms and distributed as a self-contained executable.
 
-The decrypt/encrypt work runs **server-side** via a backend the app talks to, so a
-configured backend endpoint + app key are required for those operations (see
-**Configuration** below). The app itself is a thin, safe client.
+## Features
+
+### Method 22 Assets
+
+* Decrypt encrypted FH6 asset ZIPs
+* Re-encrypt edited assets back into loadable game files
+* Supports single-chunk and multi-chunk entries
+
+### GameDB
+
+* Decrypt GameDB files
+* Re-encrypt modified databases
+
+### Profile Saves
+
+* Decrypt and re-encrypt C_ProfileData
+* Capture profile IV tables
+* Edit profile properties and XUIDs
+
+### Save Swap
+
+* Swap donor saves to another account
+* Automatic backup and recovery
+* Supports different save sizes
 
 ## Tabs
 
-- **Dashboard** — drop a file; it auto-detects the type and offers the right action.
-  Supported inputs:
-  - **Method 22 asset ZIP** (FH6 `media\*.zip` like `GameTunableSettings.zip`,
-    `Camera.zip`, `Rules.zip`) → **decrypt** to a plain ZIP of the underlying assets
-    (XML, etc.). Both single-chunk and multi-chunk entries decrypt (see **Method 22 notes**).
-  - **Decrypted Method 22 ZIP** (edited assets) → **re-encrypt** back into a loadable asset
-    ZIP. You'll be asked for the original encrypted ZIP it came from.
-  - **GameDB** (`gamedbRC.slt`) → decrypt / re-encrypt.
-  - **Decrypted SQLite** (already-decrypted GameDB) → re-encrypt.
-  - **Profile save** (`C_ProfileData`) → **decrypt / re-encrypt** using a captured IV
-    table. Drop the encrypted `C_ProfileData`, pick the matching `profile_ivs.json`
-    (from **Create Save → Capture IVs**), and it decrypts to the editable plaintext. Drop
-    a decrypted profile back in to re-encrypt it.
+### Dashboard
 
-  Outputs land in `Documents\ForzaCryptoTool\Output`.
+Drop a supported file and the tool will automatically detect it.
 
-- **Create Save** — captures the per-chunk **IV table** for your live profile, which is
-  what makes profile decrypt/re-encrypt and save swapping possible. Requires Administrator
-  (it relaunches elevated if needed). Flow: click **Capture IVs** → launch FH6 and press
-  Enter on the first screen → the tool captures the IVs during profile load, self-verifies
-  every chunk, then **automatically closes FH6** so it can't autosave over the captured
-  version. Output (`profile_ivs.json` + a matching snapshot of the profile) lands in an
-  **IV Captures** folder next to the app.
+**Supported files:**
 
-- **Save Swap** — swap a **donor** `C_ProfileData` onto your **active** account. You
-  provide the donor save + its IV table (from Create Save), your active save (the file
-  the game loads — it's overwritten), and the target XUID (grab it from the Xbox App).
-  The tool decrypts the donor, rewrites only the single account-identity XUID to your
-  account, re-encrypts under the donor's own IV table — so **any donor size works**
-  backs up your current save, and writes the swap, restoring the backup automatically 
-  if anything fails. **No active IV capture needed.**
+* Method 22 asset ZIPs
+* GameDB files
+* SQLite GameDB files
+* Profile saves (C_ProfileData)
 
-- **Profile Editor** — decrypt a `C_ProfileData` to its plaintext (with its IV table),
-  edit the embedded **XUID** and **double-click any editable property** (TotalCredits,
-  TotalXP, TotalSkills, difficulty/assist settings, and 150+ more) to change it in place,
-  then re-encrypt back into a loadable save.
+Outputs are saved to:
 
-## What's actually working
+```
+<rootfile>\Output
+```
+
+### Create Save
+
+Captures the IV table required for profile decryption and re-encryption.
+
+The tool automatically verifies the capture and creates the required files for future profile editing or save swapping.
+
+### Save Swap
+
+**Video Guide:** https://youtu.be/7-ChnwC4vTs?si=9shSeTkzTVWxoj0x
+
+### Profile Editor
+
+Edit profile values directly from a decrypted save.
+
+**Supported edits include:**
+
+* XUID
+* Credits
+* XP
+* Skill Points
+* Difficulty Settings
+* Assists
+* And many additional profile properties
+
+## How It Works
+
+1. Capture IVs from your profile.
+2. Decrypt the target file.
+3. Make your edits.
+4. Re-encrypt and load in-game.
+
+## Requirements
+
+* Windows
+* Administrator privileges for IV capture
+* Valid backend configuration
+
+## Status
 
 | Feature | Status |
-|---|---|
-| **Method 22 asset decryption** (single + multi-chunk) | ✅ Working (AES-256-CBC) |
-| **Method 22 re-encryption** (header MAC solved) | ✅ Working (decrypt → edit → re-encrypt) |
-| GameDB decrypt / re-encrypt | ✅ Working (server-side) |
-| Profile (`C_ProfileData`) decrypt / re-encrypt | ✅ Working (IV-based) |
-| Profile IV capture (Create Save) | ✅ Working |
-| Save Swap | ✅ Working |
-| Profile Editor | ✅ Working |
-
-### Profile / Save Swap notes — read this
-
-FH6 profile saves use **per-chunk IVs that the game generates at save time and does not
-store in the file**. They can only be recovered by capturing them from the running game
-(the **Create Save** tab does this). Two important consequences:
-
-- **IVs are only valid for one exact version of the save.** Any in-game autosave generates
-  brand-new IVs and invalidates a previous capture. **Workflow: capture IVs → do your
-  edit/swap → make sure FH6 is closed → copy the file in → launch.** Don't let FH6 autosave
-  between capturing and using a save. (The tool snapshots the profile *before* launching the
-  game to survive an autosave during the capture window, and it auto-closes FH6 on a
-  successful capture — but don't relaunch and play before you've used the capture.)
-- A **Save Swap** only needs the **donor's** IV table — the swap re-encrypts under the
-  donor's own IVs, so **any donor size works** and no active-save IV capture is required.
-- IV capture supports the current Steam build (`6.379.939.0`) and the earlier pre-release
-  build (`6.353.145.0`), auto-detecting which one is running. A later game update may need
-  the IV tool refreshed.
-
-### Method 22 notes
-
-Method 22 is the FH6 encrypted-asset container (AES-256-CBC). Entries come in two shapes:
-
-- **Single-chunk entries** decrypt fully **offline** — the IV is in the entry header. No
-  capture, no IV table needed. Verified byte-for-byte against the game's own decrypted output.
-  (Roughly half of all entries; e.g. `Rules.zip` is ~73% single-chunk.)
-- **Multi-chunk (large) entries** also decrypt **and re-encrypt**. They use per-page IVs the
-  game generates internally and does **not** store in the file — but those IVs are
-  **deterministic per asset**, so they only need to be captured **once, ever**, and then work
-  forever and offline. The tool ships a bundled **IV table** (`m22_iv_table.json`) covering
-  many entries; entries not yet in the table are surfaced as `unsupported` rather than emitted
-  as corrupt data.
-
-**Re-encrypt (modding workflow):** the header MAC — the one load-enforced field — is solved,
-so an edited asset re-encrypts into a **loadable** ZIP:
-
-1. Drop the encrypted asset ZIP on the Dashboard → **Decrypt** → plain ZIP of XML.
-2. Edit the XML and re-zip it (name it something like `*_decrypted.zip` / `*_edited.zip`).
-3. Drop the edited ZIP back → **Re-Encrypt** → pick the original encrypted ZIP → you get a
-   loadable `*_reencrypted.zip`. Entries you didn't change stay byte-identical; multi-chunk
-   entries you edited need their IVs in the table (same one-time capture as decrypt).
-
-To expand multi-chunk coverage, drop an updated/expanded `m22_iv_table.json` next to the EXE
-(built by the **FH6 M22 IV Tool** capture utility); the tool prefers a loose file over its
-embedded copy.
-
-- **If you want a method 22 file that the tool cannot decrypt yet, ask me to grab it for you**
-  (it just needs a one-time IV capture for that asset).
-
-## Configuration
-
-The decrypt/encrypt operations are performed by a backend service. Point the app at it:
-
-- **Backend endpoint** resolves from `FCT_BACKEND_URL` → a DPAPI-encrypted user file
-  (`endpoint.bin`, machine-bound) → an obfuscated compiled default. It is masked in
-  release builds and never logged. **DO NOT CHANGE WHAT'S IN IT.**
-- **App key** resolves from `FCT_API_KEY` → DPAPI-encrypted user file.
-
-Without a reachable backend + valid key, the client loads and detects files but cannot
-decrypt/encrypt. The **crypto keys stay server-side**; the Method 22 IV table is **not**
-secret (it's useless without the key) and is supplied with the request.
-
-## Security & safety
-
-- Crypto keys live only on the backend (env-only); they are never hardcoded, returned,
-  or logged. **Crypto keys are not public — do not ask for them.**
-- Save Swap and profile re-encrypt always **back up your active save first** and restore it
-  automatically if a write fails. See `docs/FILE_SAFETY.md`.
-- Hidden runtime logs (auto-created, redacted, retained) go to
-  `%LOCALAPPDATA%\ForzaCryptoTool\logs`. See `docs/LOGGING.md`.
-
-## Status / known limitations
-
-- **Method 22 multi-chunk coverage** depends on the bundled IV table. Single-chunk entries
-  always decrypt offline; multi-chunk entries decrypt (and re-encrypt) where the table has
-  them, and the table grows as more assets are captured (one capture per asset, permanently).
-- Profile crypto depends on a fresh IV capture per save version — see the Profile / Save
-  Swap notes above.
+|---------|--------|
+| Method 22 Decrypt | ✅ |
+| Method 22 Re-Encrypt | ✅ |
+| GameDB Decrypt/Re-Encrypt | ✅ |
+| Profile Decrypt/Re-Encrypt | ✅ |
+| IV Capture | ✅ |
+| Save Swap | ✅ |
+| Profile Editor | ✅ |
 
 ## Credits
 
-DVS — Method 22 decryption + re-encryption, profile decryption / save-swap pipeline, and tool development
+* **DVS** — Method 22 crypto, profile crypto, save swap system, and tool development
+* **xxd20xxx** — GameDB and SFS crypto research
+* **Ariza** — Save swap assistance
 
-xxd20xxx — GameDB and SFS decryption
+## Disclaimer
 
-Ariza - Help with save swap flow
+This project is still under active development. Bugs and edge cases may exist. Please report issues through GitHub Issues.
 
-## Notes
-
-- This tool is far from finished or perfect — there will be bugs and issues. Please be
-  patient and report issues via the GitHub **Issues** tab.
-
-- This is **not** to be shared outside of the github source, if you wanna share the tool please
-  post the link and **not** the exe itself.
+Please do not redistribute the compiled executable. Share the GitHub repository instead.
