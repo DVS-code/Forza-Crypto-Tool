@@ -5,17 +5,7 @@ decryption **and re-encryption** (single **and** multi-chunk), **GameDB** crypto
 full **profile / save-swap** pipeline are all live. .NET 8 WinForms, single-file
 self-contained EXE — no .NET install required on the target machine.
 
-## Run
-
-```text
-release\ForzaCryptoTool.exe
-```
-
-You can also pass a file to load on startup:
-
-```text
-release\ForzaCryptoTool.exe "C:\Forza Horizon 6\Forza Horizon 6\media\GameTunableSettings.zip"
-```
+## Backen Note:
 
 The decrypt/encrypt work runs **server-side** via a backend the app talks to, so a
 configured backend endpoint + app key are required for those operations (see
@@ -151,28 +141,18 @@ secret (it's useless without the key) and is supplied with the request.
 - Profile crypto depends on a fresh IV capture per save version — see the Profile / Save
   Swap notes above.
 
-## Build
-
-```powershell
-# Development
-dotnet build ForzaCryptoTool.csproj -c Debug
-
-# Release (single-file, self-contained, compressed) — produces release\ForzaCryptoTool.exe
-dotnet publish ForzaCryptoTool.csproj -c Release -r win-x64 --self-contained `
-  -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
-  -p:EnableCompressionInSingleFile=true -o release
-```
-
-The release EXE is ~70 MB (the .NET 8 + WinForms runtime is bundled and compressed),
-runs on a clean Windows machine with no .NET install, and is a single file.
-
 ## Credits
 
-DVS — Method 22 decryption + re-encryption, profile / save-swap pipeline, and tool development
+DVS — Method 22 decryption + re-encryption, profile decryption / save-swap pipeline, and tool development
 
 xxd20xxx — GameDB and SFS decryption
+
+Ariza - Help with save swap flow
 
 ## Notes
 
 - This tool is far from finished or perfect — there will be bugs and issues. Please be
   patient and report issues via the GitHub **Issues** tab.
+
+- This is **not** to be shared outside of the github source, if you wanna share the tool please
+  post the link and **not** the exe itself.
