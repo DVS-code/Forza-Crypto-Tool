@@ -5,7 +5,7 @@ decryption **and re-encryption** (single **and** multi-chunk), **GameDB** crypto
 full **profile / save-swap** pipeline are all live. .NET 8 WinForms, single-file
 self-contained EXE — no .NET install required on the target machine.
 
-## Backen Note:
+## Backend Note:
 
 The decrypt/encrypt work runs **server-side** via a backend the app talks to, so a
 configured backend endpoint + app key are required for those operations (see
