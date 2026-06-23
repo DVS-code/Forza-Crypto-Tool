@@ -99,7 +99,7 @@ Decrypt / re-encrypt files from earlier Forza titles. Pick the game and key type
 | Method 22 Decrypt | ✅ |
 | Method 22 Re-Encrypt | ✅ |
 | GameDB Decrypt (to editable SQLite) | ✅ |
-| GameDB Re-Encrypt | 🚧 In progress |
+| GameDB Re-Encrypt | ✅ |
 | Profile Decrypt/Re-Encrypt | ✅ |
 | IV Capture (Steam / Cracked / MS Store) | ✅ |
 | Save Swap | ✅ |
