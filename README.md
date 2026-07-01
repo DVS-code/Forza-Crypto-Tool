@@ -20,7 +20,6 @@ Built with .NET 8 WinForms and distributed as a self-contained executable.
 ### Profile Saves
 
 * Decrypt and re-encrypt C_ProfileData
-* Capture profile IV tables
 * Edit 150+ profile properties and XUIDs
 
 ### Save Swap
@@ -56,12 +55,6 @@ Outputs are saved to:
 
 > **Do NOT overwrite your game's base encrypted GameDB with a decrypted/edited DB — it will not load.** Full decrypted GameDB editing and loading into FH6 is in progress.
 
-### Create Save
-
-Captures the IV table required for profile decryption and re-encryption.
-
-The tool automatically verifies the capture and creates the required files for future profile editing or save swapping. Supports the Steam, cracked, and Microsoft Store builds.
-
 ### Save Swap
 
 Swap a donor save onto another account. Any donor size works, and full progression transfers.
@@ -89,7 +82,6 @@ Decrypt / re-encrypt files from earlier Forza titles. Pick the game and key type
 ## Requirements
 
 * Windows
-* Administrator privileges for IV capture
 * Valid backend configuration
 
 ## Status
@@ -101,7 +93,6 @@ Decrypt / re-encrypt files from earlier Forza titles. Pick the game and key type
 | GameDB Decrypt (to editable SQLite) | ✅ |
 | GameDB Re-Encrypt | ✅ |
 | Profile Decrypt/Re-Encrypt | ✅ |
-| IV Capture (Steam / Cracked / MS Store) | ✅ |
 | Save Swap | ✅ |
 | Profile Editor | ✅ |
 | Older ForzaTech (FM6 Apex / FH3 / FM7 / FH4 / FH5) | ✅ |
@@ -112,6 +103,7 @@ Decrypt / re-encrypt files from earlier Forza titles. Pick the game and key type
 * **xxd20xxx** — GameDB and SFS crypto research
 * **Ariza** — Save swap assistance
 * **Doliman100** — [ForzaTech-crypto-tool](https://github.com/Doliman100/ForzaTech-crypto-tool) (older Forza decryption)
+* **draff** — Crypto help
 
 ## Disclaimer
 
