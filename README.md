@@ -92,7 +92,7 @@ Decrypt / re-encrypt files from earlier Forza titles. Pick the game and key type
 | Method 22 Decrypt | ✅ |
 | Method 22 Re-Encrypt | ✅ |
 | Config Decrypt | ✅ |
-| config Re-Encrypt | ✅ |
+| Config Re-Encrypt | ✅ |
 | GameDB Decrypt (to editable SQLite) | ✅ |
 | GameDB Re-Encrypt | ✅ |
 | Profile Decrypt/Re-Encrypt | ✅ |
