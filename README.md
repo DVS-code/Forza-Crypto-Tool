@@ -45,6 +45,7 @@ Drop a supported file and the tool will automatically detect it.
 * Method 22 asset ZIPs
 * GameDB files
 * SQLite GameDB files
+* Config files (.ini)
 * Profile saves (C_ProfileData)
 
 Outputs are saved to:
@@ -90,6 +91,8 @@ Decrypt / re-encrypt files from earlier Forza titles. Pick the game and key type
 |---------|--------|
 | Method 22 Decrypt | ✅ |
 | Method 22 Re-Encrypt | ✅ |
+| Config Decrypt | ✅ |
+| config Re-Encrypt | ✅ |
 | GameDB Decrypt (to editable SQLite) | ✅ |
 | GameDB Re-Encrypt | ✅ |
 | Profile Decrypt/Re-Encrypt | ✅ |
