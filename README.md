@@ -6,7 +6,7 @@ Built with .NET 8 WinForms and distributed as a self-contained executable.
 
 ## Features
 
-### Config .ini files Assets
+### Config .ini files
 
 * Decrypt any config (.ini) file
 * Re-encrypt edited assets back into loadable game files
