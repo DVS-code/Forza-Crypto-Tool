@@ -1,0 +1,39 @@
+# Build output
+bin/
+obj/
+release/
+release-test/
+TestResults/
+
+# IDE / editor
+.vs/
+.idea/
+*.user
+*.suo
+
+# Logs
+*.log
+
+# --- Never publish secrets or backend/crypto artifacts ---
+# Runtime-resolved config (DPAPI-encrypted, machine-bound) — never commit
+endpoint.bin
+apikey.bin
+
+# Backend spec / audit docs contain real keys + endpoints — keep private
+docs/
+Backend Agent Prompt*
+*SECURITY_AUDIT*
+*BACKEND_REVIEW*
+*API_PROTECTION*
+
+# Captured IV tables and the embedded IV capture tool (not part of the public client)
+tools/*.json
+tools/*.exe
+*_iv_table.json
+profile_ivs.json
+
+# Local scratch
+save template FH6.bt
+PROGRESSION_LOG.md
+versions/
+screenshots/
