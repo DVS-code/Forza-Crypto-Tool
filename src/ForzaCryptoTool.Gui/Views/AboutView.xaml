@@ -1,0 +1,98 @@
+<UserControl x:Class="ForzaCryptoTool.AboutView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                  Padding="28,24">
+        <StackPanel MaxWidth="900">
+
+            <TextBlock Text="About" Style="{StaticResource TitleText}" />
+
+            <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="../Assets/logo.png" Width="48" Height="48"
+                               RenderOptions.BitmapScalingMode="HighQuality" VerticalAlignment="Top" />
+                        <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Forza Crypto Tool" Style="{StaticResource DisplayText}" FontSize="22" />
+                            <TextBlock x:Name="VersionText" Style="{StaticResource SecondaryText}" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <TextBlock Style="{StaticResource BodyText}" Margin="0,18,0,0"
+                               Text="Decrypt, edit and re-encrypt Forza Horizon 6 files, and move save progress between accounts." />
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock Text="Credits" Style="{StaticResource HeadingText}" />
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="DVS" Style="{StaticResource BodyText}"
+                                   FontWeight="SemiBold" Margin="0,0,20,6" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="Tool development, Method 22 and profile data"
+                                   Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="xxd20xxx" Style="{StaticResource BodyText}"
+                                   FontWeight="SemiBold" Margin="0,0,20,6" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="GameDB and SFS decryption"
+                                   Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Draff" Style="{StaticResource BodyText}"
+                                   FontWeight="SemiBold" Margin="0,0,20,6" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="Reverse engineering help"
+                                   Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Ariza" Style="{StaticResource BodyText}"
+                                   FontWeight="SemiBold" Margin="0,0,20,0" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="Save swap help"
+                                   Style="{StaticResource SecondaryText}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock Text="Command line" Style="{StaticResource HeadingText}" />
+                    <TextBlock Style="{StaticResource SmallText}" Margin="0,6,0,0"
+                               Text="Everything here is scriptable. The companion 'forzacrypto' binary runs the same operations headlessly, and also runs on Linux." />
+                    <Border Background="{StaticResource Bg}" CornerRadius="{StaticResource RadiusMedium}"
+                            Padding="14,12" Margin="0,12,0,0">
+                        <TextBlock Style="{StaticResource MonoText}" TextWrapping="Wrap">
+                            <Run Text="forzacrypto decrypt gamedbRC.slt -o db.sqlite" /><LineBreak />
+                            <Run Text="forzacrypto encrypt db.sqlite -o gamedbRC.slt --force" /><LineBreak />
+                            <Run Text="forzacrypto saveswap donor_C_ProfileData --rune --yes" /><LineBreak />
+                            <Run Text="forzacrypto saves" />
+                        </TextBlock>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock Text="Help and support" Style="{StaticResource HeadingText}" />
+                    <WrapPanel Margin="0,12,0,0">
+                        <Button Content="Tutorial video" Style="{StaticResource PrimaryButton}" Margin="0,0,10,8"
+                                Tag="https://www.youtube.com/watch?v=7-ChnwC4vTs" Click="OnLinkClick" />
+                        <Button Content="Discord" Style="{StaticResource SecondaryButton}" Margin="0,0,10,8"
+                                Tag="https://discord.gg/fh6" Click="OnLinkClick" />
+                        <Button Content="Ko-fi" Style="{StaticResource GhostButton}" Margin="0,0,0,8"
+                                Tag="https://ko-fi.com/Manage/" Click="OnLinkClick" />
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

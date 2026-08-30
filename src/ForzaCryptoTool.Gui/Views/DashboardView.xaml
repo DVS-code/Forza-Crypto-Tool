@@ -1,0 +1,135 @@
+<UserControl x:Class="ForzaCryptoTool.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             AllowDrop="True">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                  Padding="28,24">
+        <StackPanel MaxWidth="900" HorizontalAlignment="Stretch">
+
+            <TextBlock Text="Dashboard" Style="{StaticResource TitleText}" />
+            <TextBlock Style="{StaticResource SecondaryText}" Margin="0,4,0,20"
+                       Text="Drop a file to decrypt it, or an edited file to re-encrypt it." />
+
+            <Border x:Name="DropZone" BorderThickness="1.5"
+                    CornerRadius="{StaticResource RadiusLarge}" Padding="32,40"
+                    Cursor="Hand"
+                    MouseLeftButtonDown="OnDropZonePressed" MouseLeftButtonUp="OnDropZoneReleased">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="{StaticResource Surface}" />
+                        <Setter Property="BorderBrush" Value="{StaticResource BorderStrong}" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource Raised}" />
+                                <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+
+                <StackPanel HorizontalAlignment="Center">
+
+                    <Path Data="M12,2 L12,15 M6,9 L12,15 L18,9 M3,18 L3,21 L21,21 L21,18"
+                          Stroke="{StaticResource Accent}" StrokeThickness="1.6"
+                          StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                          Width="44" Height="44" Stretch="Uniform" HorizontalAlignment="Center" />
+                    <TextBlock x:Name="DropTitle" Text="Drop a file here"
+                               Style="{StaticResource HeadingText}" HorizontalAlignment="Center"
+                               Margin="0,16,0,0" />
+                    <TextBlock x:Name="DropHint" Style="{StaticResource SmallText}"
+                               HorizontalAlignment="Center" TextAlignment="Center" Margin="0,6,0,0"
+                               Text="GameDB (.slt) · profile saves · Method 22 archives · config files&#x0a;or click to browse" />
+                </StackPanel>
+            </Border>
+
+            <Border x:Name="FileCard" Style="{StaticResource Card}" Margin="0,16,0,0"
+                    Visibility="Collapsed">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+
+                            <TextBlock x:Name="FileNameText" Style="{StaticResource HeadingText}"
+                                       TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                            <TextBlock x:Name="FilePathText" Style="{StaticResource MonoText}"
+                                       TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
+                                       Margin="0,4,0,0" Opacity="0.75" />
+                        </StackPanel>
+
+                        <Border x:Name="KindPill" Grid.Column="1" VerticalAlignment="Top"
+                                Background="{StaticResource AccentDim}" CornerRadius="{StaticResource RadiusSmall}"
+                                Padding="10,5" Margin="12,0,0,0">
+                            <TextBlock x:Name="KindText" Style="{StaticResource SmallText}"
+                                       Foreground="{StaticResource Accent}" FontWeight="SemiBold" />
+                        </Border>
+                    </Grid>
+
+                    <WrapPanel Margin="0,16,0,0">
+                        <StackPanel Margin="0,0,32,8">
+                            <TextBlock Text="SIZE" Style="{StaticResource LabelText}" />
+                            <TextBlock x:Name="SizeText" Style="{StaticResource BodyText}" Margin="0,2,0,0" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,32,8">
+                            <TextBlock Text="MODIFIED" Style="{StaticResource LabelText}" />
+                            <TextBlock x:Name="ModifiedText" Style="{StaticResource BodyText}" Margin="0,2,0,0" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,32,8">
+                            <TextBlock Text="STATE" Style="{StaticResource LabelText}" />
+                            <TextBlock x:Name="StateText" Style="{StaticResource BodyText}" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </WrapPanel>
+
+                    <WrapPanel Margin="0,12,0,0">
+                        <Button x:Name="DecryptButton" Content="Decrypt" Style="{StaticResource PrimaryButton}"
+                                Margin="0,0,10,8" Click="OnDecryptClick" />
+                        <Button x:Name="EncryptButton" Content="Re-encrypt" Style="{StaticResource SecondaryButton}"
+                                Margin="0,0,10,8" Click="OnEncryptClick" />
+                        <Button x:Name="ClearButton" Content="Clear" Style="{StaticResource GhostButton}"
+                                Margin="0,0,0,8" Click="OnClearClick" />
+                    </WrapPanel>
+
+                    <TextBlock x:Name="ActionHint" Style="{StaticResource SmallText}" Margin="0,4,0,0"
+                               Visibility="Collapsed" />
+                </StackPanel>
+            </Border>
+
+            <Border x:Name="ResultCard" Style="{StaticResource Card}" Margin="0,16,0,0"
+                    Visibility="Collapsed">
+                <StackPanel>
+                    <TextBlock x:Name="ResultTitle" Style="{StaticResource HeadingText}" />
+                    <TextBlock x:Name="ResultText" Style="{StaticResource SecondaryText}" Margin="0,6,0,0" />
+                    <WrapPanel Margin="0,14,0,0">
+                        <Button x:Name="OpenFolderButton" Content="Show in folder"
+                                Style="{StaticResource SecondaryButton}" Margin="0,0,10,0"
+                                Click="OnOpenFolderClick" />
+                        <Button x:Name="UseResultButton" Content="Load this file"
+                                Style="{StaticResource GhostButton}" Click="OnUseResultClick"
+                                ToolTip="Load the output back in, so you can re-encrypt after editing it." />
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                <StackPanel>
+                    <Grid>
+                        <TextBlock Text="Activity" Style="{StaticResource HeadingText}" />
+                        <Button Content="Clear" Style="{StaticResource GhostButton}" Padding="10,4"
+                                MinHeight="0" FontSize="11" HorizontalAlignment="Right"
+                                Click="OnClearLogClick" />
+                    </Grid>
+
+                    <ScrollViewer x:Name="LogScroller" MaxHeight="220" Margin="0,10,0,0"
+                                  VerticalScrollBarVisibility="Auto">
+                        <ItemsControl x:Name="LogList" />
+                    </ScrollViewer>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

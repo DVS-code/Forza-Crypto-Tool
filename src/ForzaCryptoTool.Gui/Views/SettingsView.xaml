@@ -1,0 +1,87 @@
+<UserControl x:Class="ForzaCryptoTool.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                  Padding="28,24">
+        <StackPanel MaxWidth="900">
+
+            <TextBlock Text="Settings" Style="{StaticResource TitleText}" />
+            <TextBlock Style="{StaticResource SecondaryText}" Margin="0,4,0,20"
+                       Text="Output location, safety options and service status." />
+
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="Output folder" Style="{StaticResource HeadingText}" />
+                    <TextBlock Style="{StaticResource SmallText}" Margin="0,6,0,0"
+                               Text="Where the Save dialog opens." />
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="OutputBox" Grid.Column="0" Style="{StaticResource MonoField}" />
+                        <Button Grid.Column="1" Content="Change" Style="{StaticResource SecondaryButton}"
+                                Margin="10,0,0,0" Click="OnPickOutputClick" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock Text="Safety" Style="{StaticResource HeadingText}" />
+                    <TextBlock Style="{StaticResource BodyText}" Margin="0,10,0,0"
+                               Text="Backups are always created before an existing file is replaced." />
+                    <TextBlock Style="{StaticResource SmallText}" Margin="0,4,0,0"
+                               Text="Crypto outputs, profile edits, save swaps, and restores use atomic replacement and timestamped backups." />
+
+                    <CheckBox x:Name="UpdateCheck" Style="{StaticResource Check}" Margin="0,14,0,0"
+                              Content="Check for updates on startup"
+                              Checked="OnSettingToggled" Unchecked="OnSettingToggled" />
+                    <Button Content="Check for updates now" Style="{StaticResource SecondaryButton}"
+                            HorizontalAlignment="Left" Margin="0,12,0,0" Click="OnCheckUpdatesClick" />
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock Text="Service" Style="{StaticResource HeadingText}" />
+                    <TextBlock Style="{StaticResource SmallText}" Margin="0,6,0,0"
+                               Text="Crypto runs server-side; no keys are stored in this app." />
+
+                    <WrapPanel Margin="0,12,0,0">
+                        <StackPanel Margin="0,0,32,8">
+                            <TextBlock Text="ENDPOINT" Style="{StaticResource LabelText}" />
+                            <TextBlock x:Name="EndpointText" Style="{StaticResource MonoText}" Margin="0,3,0,0" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,32,8">
+                            <TextBlock Text="APP KEY" Style="{StaticResource LabelText}" />
+                            <TextBlock x:Name="ApiKeyText" Style="{StaticResource MonoText}" Margin="0,3,0,0" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,8">
+                            <TextBlock Text="STATUS" Style="{StaticResource LabelText}" />
+                            <TextBlock x:Name="HealthText" Style="{StaticResource MonoText}" Margin="0,3,0,0"
+                                       Text="not checked" />
+                        </StackPanel>
+                    </WrapPanel>
+
+                    <Button Content="Test connection" Style="{StaticResource SecondaryButton}"
+                            HorizontalAlignment="Left" Margin="0,6,0,0" Click="OnTestConnectionClick" />
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock Text="Logs" Style="{StaticResource HeadingText}" />
+                    <TextBlock Style="{StaticResource SmallText}" Margin="0,6,0,0"
+                               Text="Written automatically, with paths and keys removed." />
+                    <TextBlock x:Name="LogPathText" Style="{StaticResource MonoText}" Margin="0,10,0,0"
+                               TextWrapping="Wrap" />
+                    <Button Content="Open log folder" Style="{StaticResource SecondaryButton}"
+                            HorizontalAlignment="Left" Margin="0,12,0,0" Click="OnOpenLogsClick" />
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
