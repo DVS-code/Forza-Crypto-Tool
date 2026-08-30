@@ -1,12 +1,28 @@
 # ForzaCryptoTool
 
-Windows toolkit for Forza Horizon 6 asset, GameDB, and profile save crypto, plus decryption for older
-Forza titles.
+Toolkit for Forza Horizon 6 asset, GameDB, profile-save crypto, profile editing, and save swapping.
 
 Built with .NET 8 and WPF, distributed as a self-contained executable. The same executable is also a
 full command line, and a separate native binary runs the command line on Linux.
 
 📺 **[Video guide](https://youtu.be/7-ChnwC4vTs?si=9shSeTkzTVWxoj0x)** · 💬 **[Discord support](https://discord.gg/fh6)**
+
+---
+
+## What's new in v3.1
+
+* **Native FH6 Profile Editor.** Open encrypted or decrypted `C_ProfileData`, edit typed properties,
+  XUID, BXML, binary scalars, and embedded SQLite, then export a verified encrypted or decrypted copy.
+* **Account labels for Save Swap.** Identify discovered Xbox save folders by gamertag instead of
+  guessing which XUID belongs to which account.
+* **Safer writes.** Crypto, editor, swap, and restore outputs use atomic replacement with automatic,
+  collision-safe backups.
+* **Interface and reliability fixes.** Dark dropdowns and selections, improved editor layout,
+  unsaved-change protection, bounded profile parsing, and a secured SQLite dependency.
+* **Windows GUI plus cross-platform CLI.** The app is self-contained on Windows, with a separate
+  self-contained Linux command-line binary.
+
+See [RELEASE_NOTES.md](RELEASE_NOTES.md) for the complete v3.1.0 changes and verification results.
 
 ---
 
@@ -35,6 +51,9 @@ text, and the tool says so rather than pretending to decrypt them.
 ### Profile saves
 
 * Decrypt and re-encrypt `C_ProfileData`
+* Native FH6-only editor for typed properties, XUID, BXML, binary records and embedded SQLite
+* Lossless no-edit round trips and full parse/integrity verification before an edited copy is accepted
+* Seasonal record and item-catalog drift does not prevent a valid FH6 profile from opening
 
 ### Save Swap
 
@@ -42,6 +61,7 @@ text, and the tool says so rather than pretending to decrypt them.
 * Single-field XUID swap, so full progression transfers
 * Automatic backup and one-click restore
 * Works on Steam, cracked, Microsoft Store and **RUNE** builds
+* Optional Xbox gamertag lookup labels discovered XUIDs for multi-account installs
 
 ---
 
@@ -79,14 +99,37 @@ Saves are detected automatically for:
 
 RUNE uses one fixed account on every install, so the XUID is filled in for you there.
 
+Use **Identify accounts** to label discovered Xbox save accounts as `Gamertag · XUID`. The lookup uses
+the currently signed-in Xbox App session, keeps its token in memory only, and falls back to the numeric
+XUID if an account cannot be resolved.
+
 Every replaced file is backed up with a timestamp next to it, and **Restore original** undoes a swap —
 even after restarting the tool. Close the game before swapping, or it will save over the new file.
 
 **Video guide:** https://youtu.be/7-ChnwC4vTs?si=9shSeTkzTVWxoj0x
 
+### Profile Editor
+
+Open or drop an encrypted or decrypted FH6 `C_ProfileData` file. Encrypted input is decrypted into a
+private temporary working file; after editing, **Save copy** validates the result, re-encrypts it, and
+asks where to write the encrypted profile. The temporary plaintext is removed when the document closes.
+
+* **Properties** searches and edits every typed FH6 property, including variable-length strings.
+* **Overview** shows section sizes, SQLite health, and the canonical account XUID.
+* **Binary records** lists every registered or seasonal record and offers fixed-width scalar editing
+  for known payload offsets without changing record framing.
+* **BXML** edits the save-state string table and rebuilds all indexes safely.
+* **Database** browses every table/view and runs multi-statement SQLite scripts against a working copy.
+
+The raw printable-string scanner is intentionally not exposed as an editor tab: FH6 profiles contain
+binary framing and an embedded SQLite database, so its output is mostly duplicated schema text and
+misleading fragments. Saving writes a separate copy by default, checks SQLite integrity, then parses
+the generated profile back through the FH6-only reader before reporting success.
+
 ### Settings
 
-Output folder, backup and update options, service status with a connection test, and the log folder.
+Output folder, update options, service status with a connection test, and the log folder. Crypto,
+profile-editor, save-swap, and restore writes always create collision-safe backups when replacing files.
 
 ### About
 
@@ -108,6 +151,10 @@ ForzaCryptoTool saveswap donor_C_ProfileData --rune --yes
 ForzaCryptoTool saveswap donor_C_ProfileData --xuid 2535437902562438
 ForzaCryptoTool detect Camera.zip
 ForzaCryptoTool saves
+ForzaCryptoTool profile-inspect C_ProfileData_decrypted.bin
+ForzaCryptoTool profile-set C_ProfileData_decrypted.bin --property /Main/TotalCredits --value 25000000
+ForzaCryptoTool profile-xuid C_ProfileData_decrypted.bin --xuid 2535437902562438
+ForzaCryptoTool profile-sql C_ProfileData_decrypted.bin --sql "SELECT * FROM Data_Car LIMIT 10;"
 ```
 
 | Option | Meaning |
@@ -136,7 +183,8 @@ chmod +x forzacrypto
 ./forzacrypto decrypt gamedbRC.slt -o db.sqlite
 ```
 
-Keep `libe_sqlite3.so` beside the binary. The graphical app is Windows-only — WPF has no Linux runtime.
+The published Linux binary embeds its native SQLite dependency. The graphical app is Windows-only —
+WPF has no Linux runtime.
 
 ---
 
@@ -161,11 +209,11 @@ Keep `libe_sqlite3.so` beside the binary. The graphical app is Windows-only — 
 | Profile decrypt / re-encrypt | ✅ |
 | Save Swap (incl. RUNE) | ✅ |
 | Command line (Windows + Linux) | ✅ |
-| Profile Editor | ⏳ not yet in v3 — use v2 |
+| FH6 Profile Editor | ✅ |
 | Older ForzaTech (FM6 Apex / FH3 / FM7 / FH4 / FH5) | ⏳ not yet in v3 — use v2 |
 
-The Profile Editor and Older ForzaTech tabs have not been rebuilt in the new interface yet. The backend
-supports both, so they are coming back — until then, v2 still has them.
+The v3.1 profile editor intentionally supports FH6 only. FH5 compatibility code and older-title
+heuristics from the reference editor were not carried into the new parser.
 
 ---
 
@@ -177,6 +225,7 @@ Every supported file type was tested end-to-end against the live service on real
 |---|---|
 | GameDB (`gamedbRC.slt`, 14.5 MB) | 205 tables, 638 cars, `integrity_check = ok` |
 | Profile save (`C_ProfileData`) | 3,087,088 bytes, valid plaintext |
+| Current FH6 editor fixture | 2,700,762 bytes; 714 typed nodes; 5,405 BXML nodes; 111 binary records; SQLite `ok`; byte-identical no-edit round trip |
 | Method 22 (`Camera.zip`) | 244 entries, all valid, clean XML |
 | Config (`PhysicsSettings.ini`) | 66,508 bytes of readable config |
 
@@ -203,10 +252,10 @@ Single-file releases:
 
 ```bash
 dotnet publish src/ForzaCryptoTool.Gui -c Release -r win-x64 \
-  -p:SelfContained=true -p:PublishSingleFile=true -o release/win
+  -p:SelfContained=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o release/win
 
 dotnet publish src/ForzaCryptoTool.Cli -c Release -r linux-x64 \
-  -p:SelfContained=true -p:PublishSingleFile=true -o release/linux
+  -p:SelfContained=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o release/linux
 ```
 
 `FCT_START_VIEW=SaveSwap` opens the app on a given tab, which is handy while working on a view.
@@ -239,7 +288,8 @@ asking for help. Find them under **Settings → Logs**.
 * **xxd20xxx** — GameDB and SFS crypto research
 * **Ariza** — Save swap assistance
 * **Doliman100** — [ForzaTech-crypto-tool](https://github.com/Doliman100/ForzaTech-crypto-tool) (older Forza decryption)
-* **draff** — Crypto help
+* **draff** — Original profile-editor reference implementation, FH6 format research, and crypto help
+* **Forza Mods AIO** — Reference for Save Swap Xbox account identification via PeopleHub ([source](https://github.com/ForzaMods/Forza-Mods-AIO/blob/6adf484ec921d0f02145d37483144c9a31ec6124/Forza-Mods-AIO/TabForms/Saveswapper.cs))
 
 ---
 
@@ -252,4 +302,3 @@ This is for **offline, single-player** save editing on builds you own. Save swap
 result in a **ban** — that's your decision, and I'm not responsible for it.
 
 Please do not redistribute the compiled executable. Share the GitHub repository instead.
-
