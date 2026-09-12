@@ -115,13 +115,11 @@ internal static class FileDetection
         }
         else if (profileDecrypted)
         {
-
             kind = DetectedKind.ProfileDecrypted;
             encrypted = false;
         }
         else if (configDecrypted)
         {
-
             kind = DetectedKind.ConfigFileDecrypted;
             encrypted = false;
         }
@@ -142,13 +140,11 @@ internal static class FileDetection
         }
         else if (configEncrypted)
         {
-
             kind = DetectedKind.ConfigFileEncrypted;
             encrypted = true;
         }
         else if (profileFraming && !configExt && read > 0 && Entropy(header.AsSpan(0, read)) > 7.4)
         {
-
             kind = DetectedKind.ProfileData;
             encrypted = true;
         }
@@ -195,7 +191,6 @@ internal static class FileDetection
         }
         catch
         {
-
             return (false, false);
         }
     }

@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>ForzaCryptoTool</RootNamespace>
     <AssemblyName>ForzaCryptoTool.Core</AssemblyName>
-    <Version>3.1.0</Version>
+    <Version>3.2.0</Version>
 
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
@@ -28,6 +28,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="ForzaCryptoTool" />
     <InternalsVisibleTo Include="forzacrypto" />
+    <InternalsVisibleTo Include="ForzaCryptoTool.Tests" />
   </ItemGroup>
 
 </Project>

@@ -50,7 +50,8 @@ internal sealed class BackendClient : IDisposable
                 _bases.Add(u);
         }
 
-        Add(_endpoint.Url);
+        if (_endpoint.Source is SecureConfig.Source.Environment or SecureConfig.Source.UserConfig)
+            Add(_endpoint.Url);
     }
 
     private void ApplyAuth()
@@ -60,7 +61,7 @@ internal sealed class BackendClient : IDisposable
             ? null
             : new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", key);
         if (string.IsNullOrWhiteSpace(key))
-            Logger.Warn("No app key configured — protected backend routes will return 401. Set FCT_API_KEY.");
+            Logger.Warn("No app key configured — protected backend routes will return 401. Set one in Settings or FCT_API_KEY.");
         else
             Logger.Detail("App key loaded for backend auth.");
     }
@@ -140,7 +141,6 @@ internal sealed class BackendClient : IDisposable
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException && !ct.IsCancellationRequested)
         {
-
             Logger.Warn($"Backend request failed on {SecureConfig.Mask(active)} ({ex.GetType().Name}); attempting one failover.");
             var next = await FindNextHealthyAsync(active);
             if (next is null)
@@ -416,7 +416,6 @@ internal sealed class BackendClient : IDisposable
 
     public async Task DownloadAsync(string jobId, string kind, string destinationPath, CancellationToken ct = default)
     {
-
         using var response = await SendAsync(b => Get(b, $"/api/jobs/{Uri.EscapeDataString(jobId)}/download/{Uri.EscapeDataString(kind)}"));
         response.EnsureSuccessStatusCode();
         await using var content = await response.Content.ReadAsStreamAsync(ct);
@@ -443,7 +442,6 @@ internal sealed class BackendClient : IDisposable
         var body = await response.Content.ReadAsStringAsync();
         if (!response.IsSuccessStatusCode)
         {
-
             var safe = body.Length > 200 ? body[..200] + "…" : body;
             throw new InvalidOperationException($"Backend returned HTTP {(int)response.StatusCode}: {safe}");
         }

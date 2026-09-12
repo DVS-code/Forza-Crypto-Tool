@@ -40,7 +40,6 @@ internal static class WindowChrome
         }
         catch (DllNotFoundException)
         {
-
         }
     }
 

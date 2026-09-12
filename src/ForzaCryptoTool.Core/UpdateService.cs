@@ -40,7 +40,6 @@ internal static class UpdateService
             using var resp = await Http.GetAsync(url, ct).ConfigureAwait(false);
             if (resp.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-
                 Logger.Info("Update check: no published GitHub release available (HTTP 404).");
                 return new UpdateCheckResult(UpdateCheckStatus.NoReleases);
             }
@@ -172,7 +171,7 @@ internal static class UpdateService
             Process.Start(new ProcessStartInfo($"https://github.com/{BuildConfig.UpdateRepo}/releases/latest")
             { UseShellExecute = true });
         }
-        catch { }
+        catch {  }
     }
 
     private static void WriteAndRunSwapScript(string currentExe, string newExe)

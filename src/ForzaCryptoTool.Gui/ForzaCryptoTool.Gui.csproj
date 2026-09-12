@@ -10,7 +10,7 @@
     <AssemblyName>ForzaCryptoTool</AssemblyName>
     <AssemblyTitle>Forza Crypto Tool</AssemblyTitle>
     <Product>Forza Crypto Tool</Product>
-    <Version>3.1.0</Version>
+    <Version>3.2.0</Version>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
 
     <StartupObject>ForzaCryptoTool.EntryPoint</StartupObject>

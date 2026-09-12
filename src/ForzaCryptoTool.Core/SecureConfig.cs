@@ -50,7 +50,7 @@ internal static class SecureConfig
     public static void ClearUserEndpoint()
     {
         try { if (File.Exists(EndpointFile)) File.Delete(EndpointFile); }
-        catch { }
+        catch {  }
     }
 
     public static string? ResolveApiKey()
@@ -74,7 +74,7 @@ internal static class SecureConfig
     public static void ClearUserApiKey()
     {
         try { if (File.Exists(ApiKeyFile)) File.Delete(ApiKeyFile); }
-        catch { }
+        catch {  }
     }
 
     public static string MaskApiKey()

@@ -5,7 +5,6 @@ namespace ForzaCryptoTool;
 
 public partial class App : Application
 {
-
     internal string? InitialFile { get; init; }
 
     internal static AppSettings Settings { get; private set; } = new();
@@ -46,7 +45,7 @@ public partial class App : Application
             Backend?.Dispose();
             Logger.Info("Shutting down.");
         }
-        catch { }
+        catch {  }
         base.OnExit(e);
     }
 }

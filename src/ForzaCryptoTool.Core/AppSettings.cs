@@ -65,7 +65,7 @@ internal sealed class AppSettings
             if (tempPath is not null)
             {
                 try { File.Delete(tempPath); }
-                catch { }
+                catch {  }
             }
         }
     }

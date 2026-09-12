@@ -97,7 +97,6 @@ public partial class DashboardView : UserControl
 
     private void OnDragLeave(object sender, DragEventArgs e)
     {
-
         DropZone.ClearValue(System.Windows.Controls.Border.BorderBrushProperty);
         DropZone.ClearValue(System.Windows.Controls.Border.BackgroundProperty);
         DropTitle.Text = _file is null ? "Drop a file here" : "Drop another file";
@@ -150,7 +149,6 @@ public partial class DashboardView : UserControl
             var result = await _crypto.DecryptAsync(source, output);
             if (result.Success)
             {
-
                 _originalForReencrypt = source;
             }
             return result;

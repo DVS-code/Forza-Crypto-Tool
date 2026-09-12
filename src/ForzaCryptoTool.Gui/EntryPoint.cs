@@ -75,13 +75,11 @@ internal static class WindowsConsole
         }
         catch
         {
-
         }
     }
 
     public static void Detach()
     {
-
         if (_allocated)
         {
             Console.WriteLine();

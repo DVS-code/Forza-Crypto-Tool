@@ -22,7 +22,6 @@ internal static class ConsoleHost
 
     private static void WithColour(ConsoleColor colour, Action write)
     {
-
         ConsoleColor? previous = null;
         try
         {

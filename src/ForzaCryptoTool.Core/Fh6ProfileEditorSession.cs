@@ -116,7 +116,6 @@ internal sealed class Fh6ProfileEditorSession : IDisposable
         }
         catch (SqliteException ex) when (ex.SqliteErrorCode == 1)
         {
-
             return ExecuteQuery($"SELECT * FROM {QuoteIdentifier(table)} LIMIT {limit} OFFSET {offset}", allowChanges: false);
         }
     }
@@ -244,7 +243,6 @@ internal sealed class Fh6ProfileEditorSession : IDisposable
 
     private static IEnumerable<string> SplitStatements(string sql)
     {
-
         var current = new System.Text.StringBuilder();
         char quote = '\0';
         for (int i = 0; i < sql.Length; i++)

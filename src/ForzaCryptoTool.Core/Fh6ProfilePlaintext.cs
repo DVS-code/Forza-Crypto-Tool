@@ -4,7 +4,6 @@ namespace ForzaCryptoTool;
 
 internal static class Fh6ProfilePlaintext
 {
-
     private static readonly byte[] Preamble4 = { 0xB6, 0xF2, 0x8B, 0x4A };
 
     public static bool IsFh6Plaintext(byte[] data) =>
@@ -85,7 +84,6 @@ internal static class Fh6ProfilePlaintext
 
     public static (int Offset, ulong Xuid)? FindXuid(byte[] data, ulong? known = null)
     {
-
         int canon = CanonicalXuidOffset(data);
         if (canon >= 0)
         {

@@ -49,7 +49,6 @@ public partial class SettingsView : UserControl
 
     private void OnPickOutputClick(object sender, RoutedEventArgs e)
     {
-
         var dialog = new Microsoft.Win32.OpenFolderDialog
         {
             Title = "Choose where output files go",

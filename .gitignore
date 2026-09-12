@@ -1,31 +1,24 @@
+# Build output
 bin/
 obj/
 release/
-release-test/
-TestResults/
-
-.vs/
-.idea/
 *.user
-*.suo
 
-*.log
+# Decrypted game data and saves — never commit game content or profile data.
+*.slt
+*.sqlite
+*_decrypted.*
+*.decrypted.*
+C_ProfileData*
+*ProfileBackup*
 
-endpoint.bin
-apikey.bin
+# Local IV tables. Not secret in themselves (useless without the key), but they are
+# large captured research artifacts that belong with the RE workspace, not in this repo.
+m22_iv_table*.json
 
-docs/
-Backend Agent Prompt*
-*SECURITY_AUDIT*
-*BACKEND_REVIEW*
-*API_PROTECTION*
+# Backups produced by FileSafety.ReplaceWithBackup
+*.bak
+*.CLEANBAK*
 
-tools/*.json
-tools/*.exe
-*_iv_table.json
-profile_ivs.json
-
-save template FH6.bt
-PROGRESSION_LOG.md
-versions/
-screenshots/
+# Local archives / scratch
+Archive.zip

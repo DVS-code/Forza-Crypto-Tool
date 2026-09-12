@@ -24,7 +24,6 @@ internal sealed class SaveSwapService
         var steps = new List<Step>();
         try
         {
-
             bool isRune = RuneProfile.IsRunePath(activePath);
             if (isRune && string.IsNullOrWhiteSpace(targetXuid))
             {

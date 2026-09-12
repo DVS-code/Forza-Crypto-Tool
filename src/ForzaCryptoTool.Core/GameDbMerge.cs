@@ -106,12 +106,10 @@ internal static class GameDbMerge
             cmd.Transaction = tx;
             if (set.KeyColumns.Count == 0)
             {
-
                 cmd.CommandText = $"INSERT OR REPLACE INTO main.{Quote(set.Table)} ({colList}) SELECT {colList} FROM donor.{Quote(set.Table)};";
             }
             else
             {
-
                 var keyTuple = "(" + string.Join(", ", set.KeyColumns.Select(Quote)) + ")";
                 var paramRows = new List<string>();
                 int p = 0;

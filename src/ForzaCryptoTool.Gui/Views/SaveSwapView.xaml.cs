@@ -121,7 +121,6 @@ public partial class SaveSwapView : UserControl
 
         if (_targetIsRune)
         {
-
             XuidBox.Text = RuneProfile.XuidDecimal;
             XuidBox.IsEnabled = false;
             GrabXuidButton.IsEnabled = false;

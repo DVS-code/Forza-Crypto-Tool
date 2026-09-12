@@ -39,7 +39,6 @@ internal static class Logger
             }
             catch
             {
-
                 _writer = null;
             }
         }
@@ -50,14 +49,13 @@ internal static class Logger
         lock (Gate)
         {
             try { WriteRaw(LogLevel.Info, "=== session ended ==="); _writer?.Flush(); _writer?.Dispose(); }
-            catch { }
+            catch {  }
             _writer = null;
         }
     }
 
     public static void Log(LogLevel level, string message)
     {
-
         if (!BuildConfig.VerboseLogging && level == LogLevel.Detail)
             return;
         var safe = Redact(message);
@@ -82,8 +80,8 @@ internal static class Logger
     private static void WriteRaw(LogLevel level, string message)
     {
         var line = $"[{DateTime.Now:HH:mm:ss}] [{level.ToString().ToUpperInvariant()}] {message}";
-        try { _writer?.WriteLine(line); } catch { }
-        try { UiSink?.Invoke(level, message); } catch { }
+        try { _writer?.WriteLine(line); } catch {  }
+        try { UiSink?.Invoke(level, message); } catch {  }
     }
 
     private static void ApplyRetention()
@@ -101,10 +99,10 @@ internal static class Logger
             foreach (var f in remaining.OrderByDescending(f => f.LastWriteTime).Skip(MaxFiles))
                 TryDelete(f);
         }
-        catch { }
+        catch {  }
     }
 
-    private static void TryDelete(FileInfo f) { try { f.Delete(); } catch { } }
+    private static void TryDelete(FileInfo f) { try { f.Delete(); } catch {  } }
 
     private static readonly Regex BearerRx = new(@"(?i)\bbearer\s+[A-Za-z0-9._\-]+", RegexOptions.Compiled);
     private static readonly Regex HostRx = new(@"https?://[^\s/]+", RegexOptions.Compiled);

@@ -28,7 +28,6 @@ internal static class XuidGrabber
         }
         catch
         {
-
             Process.Start(new ProcessStartInfo("explorer.exe",
                 "shell:AppsFolder\\Microsoft.GamingApp_8wekyb3d8bbwe!Microsoft.Xbox.App")
             { UseShellExecute = true });
@@ -356,7 +355,7 @@ internal static class XuidGrabber
             }
             finally { CloseHandle(token); }
         }
-        catch { }
+        catch {  }
     }
 
     private const int PROCESS_QUERY_INFORMATION = 0x0400;

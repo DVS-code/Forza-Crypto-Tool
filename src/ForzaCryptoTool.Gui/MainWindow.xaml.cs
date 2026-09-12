@@ -20,7 +20,9 @@ public partial class MainWindow : Window
 
         var dashboard = new DashboardView(this);
         var profileEditor = new ProfileEditorView(this);
+        var assetBrowser = new AssetBrowserView(this);
         AddNav("Dashboard", "Decrypt and re-encrypt files", () => dashboard);
+        AddNav("Asset Browser", "Browse and view files inside the game install", () => assetBrowser);
         AddNav("Profile Editor", "Edit encrypted or decrypted FH6 ProfileData", () => profileEditor);
         AddNav("Save Swap", "Transfer a save onto your account", () => new SaveSwapView(this));
         AddNav("Settings", "Backend, output folder, logs", () => new SettingsView(this));
@@ -40,7 +42,7 @@ public partial class MainWindow : Window
                 var kind = File.Exists(initialFile) ? FileDetection.Detect(initialFile).Kind : DetectedKind.Unknown;
                 if (kind is DetectedKind.ProfileDecrypted or DetectedKind.ProfileData)
                 {
-                    Select(1);
+                    SelectByLabel("Profile Editor");
                     await profileEditor.LoadFileAsync(initialFile);
                 }
                 else dashboard.LoadFile(initialFile);
@@ -55,7 +57,7 @@ public partial class MainWindow : Window
         };
         Closing += (_, e) =>
         {
-            if (!profileEditor.TryClose())
+            if (!profileEditor.TryClose() || !assetBrowser.TryClose())
             {
                 e.Cancel = true;
                 return;
@@ -80,6 +82,12 @@ public partial class MainWindow : Window
 
         _current = _nav[index].Build();
         ViewHost.Content = _current;
+    }
+
+    private void SelectByLabel(string label)
+    {
+        int index = _nav.FindIndex(n => n.Button.Label.Equals(label, StringComparison.OrdinalIgnoreCase));
+        if (index >= 0) Select(index);
     }
 
     internal void SetStatus(string message)

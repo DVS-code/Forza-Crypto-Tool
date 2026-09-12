@@ -7,7 +7,6 @@ namespace ForzaCryptoTool;
 
 internal static class GameDbDiff
 {
-
     private const int MaxModifiedRowsPerTable = 2000;
     private const int MaxCellChangesPerRow = 64;
 
@@ -88,14 +87,12 @@ internal static class GameDbDiff
             var set = new DonorChangeSet { Table = table, KeyColumns = usablePk ? keyCols : new List<string>() };
             if (!usablePk)
             {
-
                 if (!RowsEqual(rowsA, rowsB)) sets.Add(set);
                 continue;
             }
 
             foreach (var kv in rowsB)
             {
-
                 if (!rowsA.TryGetValue(kv.Key, out var aRow))
                     set.ChangedKeyTuples.Add(KeyTuple(kv.Value, keyCols));
                 else if (!RowEquals(aRow, kv.Value, sharedCols, keyCols))
@@ -249,7 +246,6 @@ internal static class GameDbDiff
 
     private static List<string> PrimaryKeyColumns(SqliteConnection conn, string table)
     {
-
         var pk = new List<(int order, string name)>();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = $"PRAGMA table_info({Quote(table)});";

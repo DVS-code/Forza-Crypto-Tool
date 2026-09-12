@@ -30,7 +30,6 @@ internal static class SaveLocator
         }
         else
         {
-
             TryAdd(found, ScanWinePrefixes);
         }
         return found
@@ -144,7 +143,6 @@ internal static class SaveLocator
     {
         foreach (var driveC in WineDriveCRoots())
         {
-
             var runeRoot = Path.Combine(driveC, "users", "Public", "Documents", "MicrosoftStore", "RUNE");
             foreach (var c in ScanRuneRoot(runeRoot, "RUNE (Proton/Wine)", SaveFlavour.Proton))
                 yield return c;
@@ -235,7 +233,6 @@ internal static class SaveLocator
 
 internal static class RuneProfile
 {
-
     public const string XuidDecimal = "1337133713371337";
 
     public const string XuidHex = "0004C01DB400B0C9";
