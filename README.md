@@ -9,20 +9,25 @@ full command line, and a separate native binary runs the command line on Linux.
 
 ---
 
-## What's new in v3.1
+## What's new in v3.2
 
-* **Native FH6 Profile Editor.** Open encrypted or decrypted `C_ProfileData`, edit typed properties,
-  XUID, BXML, binary scalars, and embedded SQLite, then export a verified encrypted or decrypted copy.
-* **Account labels for Save Swap.** Identify discovered Xbox save folders by gamertag instead of
-  guessing which XUID belongs to which account.
-* **Safer writes.** Crypto, editor, swap, and restore outputs use atomic replacement with automatic,
-  collision-safe backups.
-* **Interface and reliability fixes.** Dark dropdowns and selections, improved editor layout,
-  unsaved-change protection, bounded profile parsing, and a secured SQLite dependency.
-* **Windows GUI plus cross-platform CLI.** The app is self-contained on Windows, with a separate
-  self-contained Linux command-line binary.
+* **Asset Browser.** Browse the game install as a tree and open files directly in the tool, instead
+  of decrypting an archive to disk and opening it elsewhere. Archives list from the ZIP central
+  directory alone, so expanding one is instant even at several GB, and nothing is decrypted until
+  you click a file.
+* **Editing.** Text files and archive entries can be edited and saved, either to the output folder
+  or over the original behind a second confirmation. Saving an entry rebuilds its archive with every
+  other entry copied byte-for-byte — including encrypted ones the tool cannot read — and the file's
+  original BOM and line endings are preserved.
+* **Honest per-entry status.** Every archive entry is labelled *plain*, *encrypted* or *locked*
+  before anything is opened, worked out from its page layout without decrypting. A locked entry
+  explains exactly why and never shows guessed bytes.
+* **Byte-exact archive rebuilding.** Repacking an archive with no changes reproduces it byte for
+  byte, verified across all 8,888 archives under 32 MB in the retail install.
+* **Test suite.** Ships with the source and runs against a real game install, skipping cleanly
+  without one.
 
-See [RELEASE_NOTES.md](RELEASE_NOTES.md) for the complete v3.1.0 changes and verification results.
+See [RELEASE_NOTES.md](docs/RELEASE_NOTES_v3.2.0.md) for the latest changes.
 
 ---
 
@@ -66,6 +71,27 @@ text, and the tool says so rather than pretending to decrypt them.
 ---
 
 ## Tabs
+
+### Asset Browser
+
+Point it at the game install and browse it as a tree. Folders and archives expand on click; archive
+contents come from the ZIP central directory, so opening a multi-GB archive costs no decryption and
+no network call.
+
+Each entry inside an archive carries a status:
+
+| Badge | Meaning |
+|---|---|
+| `plain` | Not encrypted (stored or deflate). Opens offline, no backend involved. |
+| `encrypted` | Method 22, decryptable — sent to the service one entry at a time when you open it. |
+| `locked` | Method 22 whose per-page IVs aren't available. Cannot be decrypted; the tooltip says why. |
+
+*Only openable* is ticked by default; untick it to see locked entries as raw bytes. Text files open
+in an editor, anything else in a hex view, so no file is a dead end.
+
+Editing a file enables **Save**, which offers the output folder or overwriting the original. Saving
+an entry rewrites the whole archive with every other entry byte-copied, so untouched files — locked
+ones included — pass through unchanged. Nothing is written that fails its own read-back.
 
 ### Dashboard
 
@@ -231,6 +257,20 @@ Every supported file type was tested end-to-end against the live service on real
 
 The config **round-trip** was also verified: decrypt → edit → re-encrypt → decrypt returns the edited
 file byte-for-byte.
+
+### v3.2 archive handling
+
+| Check | Result |
+|---|---|
+| Repack with no changes | Byte-identical across **all 8,888 archives ≤32 MB** in the retail install |
+| Central-directory parsing | Matches .NET's own ZIP reader on entry names, sizes and CRCs |
+| Method-22 page layout | Every method-22 entry in the install classifies to a legal layout |
+| Single-entry edit | The edited entry holds the new bytes; every other entry is unchanged |
+| Text round-trip | BOM and line endings preserved; an unedited file re-encodes to identical bytes |
+
+The repack check runs over the whole install rather than a sample for a reason: exactly one archive
+(`UI.zip`) contains 22 bytes of padding between two entries, and a contiguous rewrite silently
+dropped it. A sampled test would have missed it.
 
 ---
 
