@@ -27,7 +27,8 @@ full command line, and a separate native binary runs the command line on Linux.
 * **Test suite.** Ships with the source and runs against a real game install, skipping cleanly
   without one.
 
-See [RELEASE_NOTES.md](docs/RELEASE_NOTES_v3.2.0.md) for the latest changes.
+See the [release notes](https://github.com/DVS-code/Forza-Crypto-Tool/releases/tag/V3.2) for the
+full list of changes.
 
 ---
 
