@@ -239,7 +239,7 @@ WPF has no Linux runtime.
 | FH6 Profile Editor | ✅ |
 | Older ForzaTech (FM6 Apex / FH3 / FM7 / FH4 / FH5) | ⏳ not yet in v3 — use v2 |
 
-The v3.1 profile editor intentionally supports FH6 only. FH5 compatibility code and older-title
+The v3 profile editor intentionally supports FH6 only. FH5 compatibility code and older-title
 heuristics from the reference editor were not carried into the new parser.
 
 ---
