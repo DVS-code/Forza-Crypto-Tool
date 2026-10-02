@@ -60,7 +60,8 @@ internal static class CliRunner
         if (!ConfirmOverwrite(output, o)) return ExitCodes.Failure;
 
         using var backend = new BackendClient();
-        if (await backend.SelectBackendAsync() is null)
+
+        if (!CryptoService.RunsLocally(detection) && await backend.SelectBackendAsync() is null)
         {
             ConsoleHost.Error("backend offline — please try again later.");
             return ExitCodes.BackendOffline;
@@ -84,6 +85,35 @@ internal static class CliRunner
         var input = Path.GetFullPath(o.Positional[0]);
         if (!File.Exists(input)) { ConsoleHost.Error($"file not found: {input}"); return ExitCodes.FileNotFound; }
 
+        string? original = o.Get("original", "orig");
+        if (original is not null)
+        {
+            original = Path.GetFullPath(original);
+            if (!File.Exists(original)) { ConsoleHost.Error($"original not found: {original}"); return ExitCodes.FileNotFound; }
+        }
+
+        if (!TryParseLegacyTarget(o, out var legacyTarget)) return ExitCodes.BadUsage;
+
+        var plan = CryptoService.PlanLegacyEncrypt(input, original, legacyTarget, out var planError);
+        if (planError is not null) { ConsoleHost.Error(planError); return ExitCodes.BadUsage; }
+        if (plan is not null)
+        {
+            var legacyOutput = ResolveOutput(o, input,
+                CryptoService.LegacyEncryptOutputName(Path.GetFileName(input), plan.OriginalPath));
+            if (!ConfirmOverwrite(legacyOutput, o)) return ExitCodes.Failure;
+
+            using var offline = new BackendClient();
+            var local = new CryptoService(offline);
+            local.Progress += ConsoleHost.Write;
+
+            var legacyResult = await local.EncryptAsync(input, legacyOutput, original, legacy: legacyTarget);
+            if (!legacyResult.Success) { ConsoleHost.Error(legacyResult.Message); return ExitCodes.Failure; }
+
+            ConsoleHost.Write(legacyResult.Message);
+            ConsoleHost.Write(legacyResult.OutputPath!);
+            return ExitCodes.Success;
+        }
+
         var detection = FileDetection.Detect(input);
         if (!CryptoService.CanEncrypt(detection.Kind))
         {
@@ -91,16 +121,10 @@ internal static class CliRunner
             return ExitCodes.Unsupported;
         }
 
-        string? original = o.Get("original", "orig");
-        if (CryptoService.NeedsOriginalToEncrypt(detection.Kind))
+        if (CryptoService.NeedsOriginalToEncrypt(detection.Kind) && original is null)
         {
-            if (original is null)
-            {
-                ConsoleHost.Error($"{detection.KindLabel} needs the original encrypted file: --original <path>");
-                return ExitCodes.BadUsage;
-            }
-            original = Path.GetFullPath(original);
-            if (!File.Exists(original)) { ConsoleHost.Error($"original not found: {original}"); return ExitCodes.FileNotFound; }
+            ConsoleHost.Error($"{detection.KindLabel} needs the original encrypted file: --original <path>");
+            return ExitCodes.BadUsage;
         }
 
         var output = ResolveOutput(o, input, CryptoService.DefaultOutputName(detection.Kind, detection.FileName));
@@ -124,6 +148,43 @@ internal static class CliRunner
         return ExitCodes.Success;
     }
 
+    private static bool TryParseLegacyTarget(CliOptions o, out CryptoService.LegacyTarget? target)
+    {
+        target = null;
+        var gameText = o.Get("game", "g");
+        var keyText = o.Get("key", "k");
+
+        if (gameText is null)
+        {
+            if (keyText is null) return true;
+            ConsoleHost.Error("--key only applies to FH5 and older: add --game <name>.");
+            return false;
+        }
+
+        if (!LegacyKeyStore.TryParseGame(gameText, out var game))
+        {
+            ConsoleHost.Error($"unknown game '{gameText}'. Use one of: {LegacyGameList()}. (FH6 needs no --game.)");
+            return false;
+        }
+
+        LegacyKeyType? keyType = null;
+        if (keyText is not null)
+        {
+            if (!LegacyKeyStore.TryParseKeyType(keyText, out var parsed))
+            {
+                ConsoleHost.Error($"unknown key type '{keyText}'. {LegacyKeyStore.ShortName(game)} has: {string.Join(", ", LegacyKeyStore.KeyTypes(game))}.");
+                return false;
+            }
+            keyType = parsed;
+        }
+
+        target = new CryptoService.LegacyTarget(game, keyType);
+        return true;
+    }
+
+    private static string LegacyGameList()
+        => string.Join(", ", Enum.GetValues<LegacyGame>().Reverse().Select(LegacyKeyStore.ShortName));
+
     private static int Detect(CliOptions o)
     {
         if (o.Positional.Count == 0) { ConsoleHost.Error("detect needs at least one file."); return ExitCodes.BadUsage; }
@@ -143,7 +204,17 @@ internal static class CliRunner
             ConsoleHost.Write($"  type      : {d.KindLabel}");
             ConsoleHost.Write($"  size      : {d.SizeLabel} ({d.Size:N0} bytes)");
             ConsoleHost.Write($"  encrypted : {(d.Encrypted ? "yes" : "no")}");
+            if (d.Legacy is { } legacy)
+            {
+                ConsoleHost.Write($"  game      : {LegacyKeyStore.FullName(legacy.Context.Game)}");
+                ConsoleHost.Write($"  key       : {legacy.Context.KeyType} (0x{legacy.Context.BlockSize:X} blocks)");
+                if (d.Kind == DetectedKind.LegacyEncrypted)
+                    ConsoleHost.Write($"  iv        : {legacy.IvHex}");
+                ConsoleHost.Write("  runs      : on this machine (no backend)");
+            }
             ConsoleHost.Write($"  supports  : {(actions.Count > 0 ? string.Join(", ", actions) : "nothing (unrecognised)")}");
+            if (!d.Encrypted)
+                ConsoleHost.Write("  note      : for FH5 or older, encrypt with --game <name> (or --original <encrypted file>)");
             if (CryptoService.NeedsOriginalToEncrypt(d.Kind))
                 ConsoleHost.Write("  note      : re-encrypting this needs --original <encrypted file>");
         }
@@ -405,6 +476,8 @@ internal static class CliRunner
         help.AppendLine("OPTIONS");
         help.AppendLine("  -o, --output <path>  Output file, or a directory to use the default name");
         help.AppendLine("      --original <f>   The original ENCRYPTED file (required to re-encrypt configs / Method 22)");
+        help.AppendLine("  -g, --game <name>    Encrypt for FH5 or older instead of FH6 (see below)");
+        help.AppendLine("  -k, --key <type>     With --game: Profile, GameDB, File, ConfigFile, SFS, Photo, Dynamic, Reward");
         help.AppendLine("      --target <path>  Save-swap destination (a C_ProfileData path)");
         help.AppendLine("      --rune           Target the RUNE save; its XUID is filled in automatically");
         help.AppendLine("  -x, --xuid <id>      Target account XUID (decimal or 0x hex)");
@@ -418,6 +491,15 @@ internal static class CliRunner
         help.AppendLine($"  {exe} encrypt PhysicsSettings_decrypted.ini --original PhysicsSettings.ini");
         help.AppendLine($"  {exe} saveswap donor_C_ProfileData --rune --yes");
         help.AppendLine($"  {exe} saveswap donor_C_ProfileData --xuid 2535437902562438");
+        help.AppendLine();
+        help.AppendLine("FH5 AND OLDER");
+        help.AppendLine("  Files from FM6 Apex, FH3, FM7, FH4 and FH5 are recognised automatically and handled");
+        help.AppendLine("  on this machine — no backend, works offline. To encrypt, name the game or pass the");
+        help.AppendLine("  original (which also reuses its IVs, so an unedited file comes back identical).");
+        help.AppendLine($"  Games: {LegacyGameList()}");
+        help.AppendLine($"  {exe} decrypt GameTunableSettings.zip");
+        help.AppendLine($"  {exe} encrypt PhysicsSettings_decrypted.ini --game FH4");
+        help.AppendLine($"  {exe} encrypt gamedbRC_decrypted.slt --original gamedbRC.slt -o out/");
         help.AppendLine();
         help.AppendLine("EXIT CODES");
         help.AppendLine("  0 ok   1 failed   2 bad usage   3 file not found   4 backend offline   5 unsupported type");

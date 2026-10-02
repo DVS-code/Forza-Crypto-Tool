@@ -3,7 +3,7 @@ namespace ForzaCryptoTool;
 internal static class BuildConfig
 {
     public const string AppName = "ForzaCryptoTool";
-    public static readonly Version AppVersion = new(3, 2, 0);
+    public static readonly Version AppVersion = new(3, 3, 0);
 
     public const string UpdateRepo = "DVS-code/Forza-Crypto-Tool";
 

@@ -39,7 +39,7 @@
                                Margin="0,16,0,0" />
                     <TextBlock x:Name="DropHint" Style="{StaticResource SmallText}"
                                HorizontalAlignment="Center" TextAlignment="Center" Margin="0,6,0,0"
-                               Text="GameDB (.slt) · profile saves · Method 22 archives · config files&#x0a;or click to browse" />
+                               Text="GameDB (.slt) · profile saves · Method 22 archives · config files&#x0a;FH6, and FH5 and older · or click to browse" />
                 </StackPanel>
             </Border>
 
@@ -81,6 +81,19 @@
                         <StackPanel Margin="0,0,32,8">
                             <TextBlock Text="STATE" Style="{StaticResource LabelText}" />
                             <TextBlock x:Name="StateText" Style="{StaticResource BodyText}" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </WrapPanel>
+
+                    <WrapPanel x:Name="TargetRow" Margin="0,8,0,0" Visibility="Collapsed">
+                        <StackPanel Margin="0,0,16,8">
+                            <TextBlock Text="RE-ENCRYPT FOR" Style="{StaticResource LabelText}" />
+                            <ComboBox x:Name="GameCombo" Width="260" Margin="0,6,0,0"
+                                      SelectionChanged="OnTargetGameChanged" />
+                        </StackPanel>
+                        <StackPanel x:Name="KeyPanel" Margin="0,0,16,8" Visibility="Collapsed">
+                            <TextBlock Text="KEY" Style="{StaticResource LabelText}" />
+                            <ComboBox x:Name="KeyCombo" Width="150" Margin="0,6,0,0"
+                                      ToolTip="Picked from the file's contents. Change it only if the file is a different type." />
                         </StackPanel>
                     </WrapPanel>
 

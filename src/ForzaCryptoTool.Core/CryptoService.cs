@@ -25,9 +25,12 @@ internal sealed class CryptoService
     public static bool CanDecrypt(DetectedKind kind) => kind switch
     {
         DetectedKind.GameDbEncrypted or DetectedKind.ProfileData
-            or DetectedKind.Method22Zip or DetectedKind.ConfigFileEncrypted => true,
+            or DetectedKind.Method22Zip or DetectedKind.ConfigFileEncrypted
+            or DetectedKind.LegacyEncrypted or DetectedKind.LegacyZip => true,
         _ => false,
     };
+
+    public static bool RunsLocally(DetectionResult detection) => detection.Legacy is not null;
 
     public static bool CanEncrypt(DetectedKind kind) => kind switch
     {
@@ -52,8 +55,21 @@ internal sealed class CryptoService
         DetectedKind.Method22ZipDecrypted => Path.GetFileNameWithoutExtension(inputName) + "_reencrypted.zip",
         DetectedKind.ConfigFileEncrypted => Path.GetFileNameWithoutExtension(inputName) + "_decrypted" + Path.GetExtension(inputName),
         DetectedKind.ConfigFileDecrypted => Path.GetFileNameWithoutExtension(inputName).Replace("_decrypted", "").Replace("_edited", "") + Path.GetExtension(inputName),
+        DetectedKind.LegacyEncrypted or DetectedKind.LegacyZip => Path.GetFileNameWithoutExtension(inputName) + "_decrypted" + Path.GetExtension(inputName),
         _ => inputName + ".out",
     };
+
+    public static string LegacyEncryptOutputName(string inputName, string? originalPath)
+    {
+        string name = originalPath is not null
+            ? Path.GetFileName(originalPath)
+            : Path.GetFileNameWithoutExtension(inputName).Replace("_decrypted", "").Replace("-decrypted", "").Replace("_edited", "")
+              + Path.GetExtension(inputName);
+
+        if (name.Length == 0 || string.Equals(name, inputName, StringComparison.OrdinalIgnoreCase))
+            name = Path.GetFileNameWithoutExtension(inputName) + "_encrypted" + Path.GetExtension(inputName);
+        return name;
+    }
 
     public async Task<CryptoResult> DecryptAsync(string inputPath, string outputPath, CancellationToken ct = default)
     {
@@ -66,6 +82,9 @@ internal sealed class CryptoService
 
         Report($"Detected {detection.KindLabel} ({detection.SizeLabel}).");
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
+
+        if (detection.Legacy is not null)
+            return await Task.Run(() => DecryptLegacy(detection, inputPath, outputPath), ct);
 
         return detection.Kind switch
         {
@@ -132,11 +151,136 @@ internal sealed class CryptoService
         return CryptoResult.Ok(outputPath, $"Config decrypted to {Path.GetFileName(outputPath)} ({plain.Length:N0} bytes).");
     }
 
+    internal sealed record LegacyTarget(LegacyGame Game, LegacyKeyType? KeyType = null);
+
+    internal sealed record LegacyPlan(LegacyContext Context, string? OriginalPath, DetectionResult? Original);
+
+    public static LegacyPlan? PlanLegacyEncrypt(string inputPath, string? originalPath, LegacyTarget? target, out string? error)
+    {
+        error = null;
+        DetectionResult? original = null;
+        if (!string.IsNullOrWhiteSpace(originalPath) && File.Exists(originalPath))
+        {
+            var detected = FileDetection.Detect(originalPath);
+            if (detected.Legacy is not null) original = detected;
+        }
+        if (original is null) originalPath = null;
+
+        if (target is null && original is null) return null;
+
+        var originalContext = original?.Legacy!.Context;
+        var game = target?.Game ?? originalContext!.Game;
+
+        var keyType = target?.KeyType
+            ?? (originalContext is not null && originalContext.Game == game
+                ? originalContext.KeyType
+                : InferLegacyKeyType(inputPath, game));
+
+        var context = LegacyKeyStore.Find(game, keyType);
+        if (context is null)
+        {
+            error = $"{LegacyKeyStore.FullName(game)} has no {keyType} key. Available: "
+                  + string.Join(", ", LegacyKeyStore.KeyTypes(game)) + ".";
+            return null;
+        }
+        return new LegacyPlan(context, originalPath, original);
+    }
+
+    public static LegacyKeyType InferLegacyKeyType(string inputPath, LegacyGame game)
+    {
+        Span<byte> head = stackalloc byte[16];
+        int read;
+        using (var stream = File.OpenRead(inputPath))
+            read = stream.Read(head);
+
+        var guess = read >= 16 && head.SequenceEqual("SQLite format 3\0"u8) ? LegacyKeyType.GameDB
+            : read >= 4 && head[0] == 0xB6 && head[1] == 0xF2 && head[2] == 0x8B && head[3] == 0x4A ? LegacyKeyType.Profile
+            : LegacyKeyStore.DefaultKeyType(game);
+        return LegacyKeyStore.Find(game, guess) is not null ? guess : LegacyKeyStore.DefaultKeyType(game);
+    }
+
+    private CryptoResult DecryptLegacy(DetectionResult detection, string inputPath, string outputPath)
+    {
+        var info = detection.Legacy!;
+        Report($"{LegacyKeyStore.FullName(info.Context.Game)}, {info.Context.KeyType} key — decrypting on this machine.");
+        var input = File.ReadAllBytes(inputPath);
+
+        if (detection.Kind == DetectedKind.LegacyZip)
+        {
+            var archive = LegacyZip.Decrypt(input);
+            FileSafety.ReplaceWithBackup(outputPath, archive.Archive);
+            var notes = new List<string>();
+            if (archive.Unrecognised > 0) notes.Add($"{archive.Unrecognised:N0} left encrypted (no key fits)");
+            if (archive.BadBlockMacs > 0) notes.Add($"{archive.BadBlockMacs:N0} block MAC(s) did not verify — the archive may be damaged");
+            return CryptoResult.Ok(outputPath,
+                $"Archive decrypted to {Path.GetFileName(outputPath)}: {archive.Converted:N0} entries"
+                + (notes.Count > 0 ? $" ({string.Join("; ", notes)})." : ", all MACs verified."));
+        }
+
+        Report($"IV {info.IvHex}, {info.DataBytes / info.Context.BlockSize:N0} block(s) of 0x{info.Context.BlockSize:X}.");
+        var result = LegacyCrypto.Decrypt(input, info);
+        FileSafety.ReplaceWithBackup(outputPath, result.Plaintext);
+        return CryptoResult.Ok(outputPath,
+            $"{info.Context.Label} decrypted to {Path.GetFileName(outputPath)} ({result.Plaintext.Length:N0} bytes"
+            + (result.BadBlockMacs > 0
+                ? $"; {result.BadBlockMacs:N0} block MAC(s) did not verify — the file may be damaged)."
+                : ", all MACs verified)."));
+    }
+
+    private CryptoResult EncryptLegacy(LegacyPlan plan, string inputPath, string outputPath)
+    {
+        var context = plan.Context;
+        Report($"{LegacyKeyStore.FullName(context.Game)}, {context.KeyType} key — encrypting on this machine.");
+        var input = File.ReadAllBytes(inputPath);
+
+        bool isZip = input.Length >= 4 && input[0] == 'P' && input[1] == 'K' && input[2] == 3 && input[3] == 4;
+        if (isZip)
+        {
+            Dictionary<string, byte[]>? ivs = null;
+            if (plan.Original?.Kind == DetectedKind.LegacyZip)
+                ivs = LegacyZip.ReadEntryIvs(File.ReadAllBytes(plan.OriginalPath!));
+
+            var archive = LegacyZip.Encrypt(input, context, name => ivs is not null && ivs.TryGetValue(name, out var iv) ? iv : null);
+            if (archive.Converted == 0)
+                return CryptoResult.Fail("This archive has no deflate-compressed entries to encrypt.");
+
+            var check = LegacyZip.Decrypt(archive.Archive);
+            if (check.Converted != archive.Converted || check.BadBlockMacs != 0 || check.Unrecognised != 0)
+                return CryptoResult.Fail("Self-check failed: the encrypted archive did not decrypt back cleanly. Nothing was written.");
+
+            FileSafety.ReplaceWithBackup(outputPath, archive.Archive);
+            return CryptoResult.Ok(outputPath,
+                $"Archive encrypted to {Path.GetFileName(outputPath)}: {archive.Converted:N0} entries, verified by decrypting them back.");
+        }
+
+        var iv = plan.Original?.Kind == DetectedKind.LegacyEncrypted ? plan.Original.Legacy!.Iv : LegacyCrypto.RandomIv();
+        var encrypted = LegacyCrypto.Encrypt(input, context, iv);
+
+        var roundTrip = LegacyCrypto.TryDecrypt(encrypted);
+        if (roundTrip is null || roundTrip.Info.Context != context || roundTrip.BadBlockMacs != 0
+            || roundTrip.Plaintext.Length < input.Length
+            || !roundTrip.Plaintext.AsSpan(0, input.Length).SequenceEqual(input))
+            return CryptoResult.Fail("Self-check failed: the encrypted file did not decrypt back to the input. Nothing was written.");
+
+        FileSafety.ReplaceWithBackup(outputPath, encrypted);
+        return CryptoResult.Ok(outputPath,
+            $"{context.Label} encrypted to {Path.GetFileName(outputPath)} ({encrypted.Length:N0} bytes, verified by decrypting it back).");
+    }
+
     public async Task<CryptoResult> EncryptAsync(
-        string inputPath, string outputPath, string? originalPath = null, CancellationToken ct = default)
+        string inputPath, string outputPath, string? originalPath = null, CancellationToken ct = default,
+        LegacyTarget? legacy = null)
     {
         if (!File.Exists(inputPath))
             return CryptoResult.Fail($"File not found: {inputPath}");
+
+        var plan = PlanLegacyEncrypt(inputPath, originalPath, legacy, out var planError);
+        if (planError is not null) return CryptoResult.Fail(planError);
+        if (plan is not null)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
+            return await Task.Run(() => EncryptLegacy(plan, inputPath, outputPath), ct);
+        }
 
         var detection = FileDetection.Detect(inputPath);
         if (!CanEncrypt(detection.Kind))

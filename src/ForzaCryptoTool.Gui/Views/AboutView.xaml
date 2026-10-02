@@ -20,7 +20,7 @@
                     </StackPanel>
 
                     <TextBlock Style="{StaticResource BodyText}" Margin="0,18,0,0"
-                               Text="Decrypt, edit and re-encrypt Forza Horizon 6 files, and move save progress between accounts." />
+                               Text="Decrypt, edit and re-encrypt Forza Horizon 6 files, and move save progress between accounts. Files from FH5 and older are decrypted and re-encrypted too, on this machine." />
                 </StackPanel>
             </Border>
 
@@ -33,6 +33,7 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
@@ -55,8 +56,13 @@
                                    Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
 
                         <TextBlock Grid.Row="3" Grid.Column="0" Text="Ariza" Style="{StaticResource BodyText}"
-                                   FontWeight="SemiBold" Margin="0,0,20,0" />
+                                   FontWeight="SemiBold" Margin="0,0,20,6" />
                         <TextBlock Grid.Row="3" Grid.Column="1" Text="Save swap help"
+                                   Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Doliman100" Style="{StaticResource BodyText}"
+                                   FontWeight="SemiBold" Margin="0,0,20,0" />
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="CryptoTool — keys and cipher for FH5 and older"
                                    Style="{StaticResource SecondaryText}" />
                     </Grid>
                 </StackPanel>

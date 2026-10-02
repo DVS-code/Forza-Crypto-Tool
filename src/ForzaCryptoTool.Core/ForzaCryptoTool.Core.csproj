@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>ForzaCryptoTool</RootNamespace>
     <AssemblyName>ForzaCryptoTool.Core</AssemblyName>
-    <Version>3.2.0</Version>
+    <Version>3.3.0</Version>
 
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
@@ -18,6 +18,10 @@
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
 
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="LegacyTfit.bin" LogicalName="ForzaCryptoTool.LegacyTfit.bin" />
   </ItemGroup>
 
   <ItemGroup>

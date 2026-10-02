@@ -11,6 +11,10 @@ internal enum DetectedKind
     PlainZip,
     ConfigFileEncrypted,
     ConfigFileDecrypted,
+
+    LegacyEncrypted,
+
+    LegacyZip,
     Unknown,
 }
 
@@ -23,8 +27,13 @@ internal sealed record DetectionResult(
     bool Encrypted,
     bool IntegrityOk)
 {
+    public LegacyFileInfo? Legacy { get; init; }
+
     public string KindLabel => Kind switch
     {
+        DetectedKind.LegacyEncrypted when Legacy is not null => Legacy.Context.Label,
+        DetectedKind.LegacyZip when Legacy is not null
+            => $"{LegacyKeyStore.ShortName(Legacy.Context.Game)} Method 22 ZIP",
         DetectedKind.GameDbEncrypted => "GameDB",
         DetectedKind.GameDbDecrypted => "GameDB (decrypted SQLite)",
         DetectedKind.ProfileData => "Profile Data",
@@ -87,6 +96,16 @@ internal static class FileDetection
             && (ext is ".ini" or ".cfg" or ".config" or ".txt" || name.Contains("settings") || name.Contains("physics"));
 
         bool isZip = read >= 4 && header[0] == 'P' && header[1] == 'K' && header[2] == 3 && header[3] == 4;
+
+        var legacy = readable ? IdentifyLegacy(path, header.AsSpan(0, read), info.Length, isZip) : null;
+        if (legacy is not null)
+        {
+            var legacyKind = isZip ? DetectedKind.LegacyZip : DetectedKind.LegacyEncrypted;
+            return new DetectionResult(path, info.Name, legacyKind, info.Length, info.LastWriteTime, true, true)
+            {
+                Legacy = legacy,
+            };
+        }
         var (hasM22, validZip) = isZip ? ScanZip(path) : (false, false);
 
         bool method22Zip = hasM22;
@@ -156,6 +175,18 @@ internal static class FileDetection
 
         bool integrity = readable && info.Length > 0 && kind != DetectedKind.Unknown;
         return new DetectionResult(path, info.Name, kind, info.Length, info.LastWriteTime, encrypted, integrity);
+    }
+
+    private static LegacyFileInfo? IdentifyLegacy(string path, ReadOnlySpan<byte> header, long length, bool isZip)
+    {
+        try
+        {
+            return isZip ? LegacyZip.IdentifyFirstEntry(path) : LegacyCrypto.Identify(header, length);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static (bool hasM22, bool validZip) ScanZip(string path)
