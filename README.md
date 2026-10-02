@@ -1,6 +1,7 @@
 # ForzaCryptoTool
 
-Toolkit for Forza Horizon 6 asset, GameDB, profile-save crypto, profile editing, and save swapping.
+Toolkit for Forza Horizon 6 asset, GameDB, profile-save crypto, profile editing, and save swapping —
+plus offline decrypt and re-encrypt for FH5 and older.
 
 Built with .NET 8 and WPF, distributed as a self-contained executable. The same executable is also a
 full command line, and a separate native binary runs the command line on Linux.
@@ -9,30 +10,27 @@ full command line, and a separate native binary runs the command line on Linux.
 
 ---
 
-## What's new in v3.2
+## What's new in v3.3
 
-* **Asset Browser.** Browse the game install as a tree and open files directly in the tool, instead
-  of decrypting an archive to disk and opening it elsewhere. Archives list from the ZIP central
-  directory alone, so expanding one is instant even at several GB, and nothing is decrypted until
-  you click a file.
-* **Editing.** Text files and archive entries can be edited and saved, either to the output folder
-  or over the original behind a second confirmation. Saving an entry rebuilds its archive with every
-  other entry copied byte-for-byte — including encrypted ones the tool cannot read — and the file's
-  original BOM and line endings are preserved.
-* **Honest per-entry status.** Every archive entry is labelled *plain*, *encrypted* or *locked*
-  before anything is opened, worked out from its page layout without decrypting. A locked entry
-  explains exactly why and never shows guessed bytes.
-* **Byte-exact archive rebuilding.** Repacking an archive with no changes reproduces it byte for
-  byte, verified across all 8,888 archives under 32 MB in the retail install.
-* **Test suite.** Ships with the source and runs against a real game install, skipping cleanly
-  without one.
+* **FH5 and older.** Files from FM6 Apex, FH3, FM7, FH4 and FH5 can now be decrypted and
+  re-encrypted — saves, GameDB, loose files and Method 22 ZIPs. These run on your own machine, so no
+  internet connection is needed for them.
+* The game and file type are detected automatically.
+* Based on [Doliman100's ForzaTech-crypto-tool](https://github.com/Doliman100/ForzaTech-crypto-tool).
 
-See the [release notes](https://github.com/DVS-code/Forza-Crypto-Tool/releases/tag/V3.2) for the
+See the [release notes](https://github.com/DVS-code/Forza-Crypto-Tool/releases/tag/V3.3) for the
 full list of changes.
 
 ---
 
 ## Features
+
+### FH5 and older
+
+Decrypt and re-encrypt files from **FM6 Apex, FH3, FM7, FH4 and FH5**: saves, GameDB, loose files
+such as `PhysicsSettings.ini`, and Method 22 asset ZIPs. This runs on your machine and works offline.
+
+FH5 is supported up to build 1.619.349.0. Based on Doliman100's ForzaTech-crypto-tool.
 
 ### Config .ini files
 
@@ -106,6 +104,9 @@ Re-encrypt actually applies.
 * SQLite GameDB files
 * Config files (`.ini`)
 * Profile saves (`C_ProfileData`)
+* Any of the above from FH5 and older
+
+To encrypt a file for an older game, choose the game under **Re-encrypt for**.
 
 Outputs default to `Documents\ForzaCryptoTool\Output`, configurable in Settings.
 
@@ -178,6 +179,8 @@ ForzaCryptoTool saveswap donor_C_ProfileData --rune --yes
 ForzaCryptoTool saveswap donor_C_ProfileData --xuid 2535437902562438
 ForzaCryptoTool detect Camera.zip
 ForzaCryptoTool saves
+ForzaCryptoTool encrypt PhysicsSettings_decrypted.ini --game FH4
+ForzaCryptoTool encrypt gamedbRC_decrypted.slt --original gamedbRC.slt -o out/
 ForzaCryptoTool profile-inspect C_ProfileData_decrypted.bin
 ForzaCryptoTool profile-set C_ProfileData_decrypted.bin --property /Main/TotalCredits --value 25000000
 ForzaCryptoTool profile-xuid C_ProfileData_decrypted.bin --xuid 2535437902562438
@@ -188,6 +191,8 @@ ForzaCryptoTool profile-sql C_ProfileData_decrypted.bin --sql "SELECT * FROM Dat
 |---|---|
 | `-o, --output <path>` | Output file, or a directory to use the default name |
 | `--original <file>` | The original **encrypted** file (needed for config / Method 22 re-encrypt) |
+| `-g, --game <name>` | Encrypt for FH5 or older: `FH5`, `FH5_v1.614.70.0`, `FH5_v1.619.349.0`, `FH4`, `FM7`, `FH3`, `FH3Dev`, `FM6Apex` |
+| `-k, --key <type>` | With `--game`, override the detected key type |
 | `--target <path>` | Save-swap destination (a `C_ProfileData` path) |
 | `--rune` | Target the RUNE save; its XUID is filled in automatically |
 | `-x, --xuid <id>` | Target account XUID (decimal or `0x` hex) |
@@ -197,6 +202,9 @@ ForzaCryptoTool profile-sql C_ProfileData_decrypted.bin --sql "SELECT * FROM Dat
 
 Exit codes: `0` ok · `1` failed · `2` bad usage · `3` file not found · `4` backend offline ·
 `5` unsupported type.
+
+Older-title files need neither flag to decrypt. To encrypt one, name the game with `--game` or pass
+`--original`.
 
 ### Linux
 
@@ -218,7 +226,7 @@ WPF has no Linux runtime.
 ## Requirements
 
 * Windows 10 or later for the app; any modern x64 Linux for the CLI
-* An internet connection — decryption runs server-side
+* An internet connection for FH6 — that decryption runs server-side. FH5 and older work offline.
 * Nothing to install; both binaries are self-contained
 
 ---
@@ -237,7 +245,7 @@ WPF has no Linux runtime.
 | Save Swap (incl. RUNE) | ✅ |
 | Command line (Windows + Linux) | ✅ |
 | FH6 Profile Editor | ✅ |
-| Older ForzaTech (FM6 Apex / FH3 / FM7 / FH4 / FH5) | ⏳ not yet in v3 — use v2 |
+| Older ForzaTech (FM6 Apex / FH3 / FM7 / FH4 / FH5) decrypt / re-encrypt | ✅ |
 
 The v3 profile editor intentionally supports FH6 only. FH5 compatibility code and older-title
 heuristics from the reference editor were not carried into the new parser.
@@ -258,6 +266,12 @@ Every supported file type was tested end-to-end against the live service on real
 
 The config **round-trip** was also verified: decrypt → edit → re-encrypt → decrypt returns the edited
 file byte-for-byte.
+
+### FH5 and older
+
+Tested on retail FH3 and FH4 files (save, GameDB, `PhysicsSettings.ini`, asset ZIPs): decrypted output
+matches Doliman100's CryptoTool, and decrypt → re-encrypt reproduces the original file byte for byte.
+FM6 Apex, FM7 and FH5 have not been tested on retail files.
 
 ### v3.2 archive handling
 
@@ -305,8 +319,10 @@ dotnet publish src/ForzaCryptoTool.Cli -c Release -r linux-x64 \
 
 ## How it works
 
-Decryption runs **server-side**. This client holds no encryption keys — it identifies files, uploads
+FH6 decryption runs **server-side**. This client holds no FH6 keys — it identifies files, uploads
 them, polls the job, and writes the result. That is deliberate: the keys stay off end-user machines.
+
+FH5 and older are handled locally instead, using the keys from Doliman100's ForzaTech-crypto-tool.
 
 Configuration resolves in this order, for both the endpoint and the app key:
 
@@ -328,7 +344,7 @@ asking for help. Find them under **Settings → Logs**.
 * **DVS** — Method 22 crypto, profile crypto, save swap system, and tool development — [youtube.com/@dvssquad](https://www.youtube.com/@dvssquad)
 * **xxd20xxx** — GameDB and SFS crypto research
 * **Ariza** — Save swap assistance
-* **Doliman100** — [ForzaTech-crypto-tool](https://github.com/Doliman100/ForzaTech-crypto-tool) (older Forza decryption)
+* **Doliman100** — [ForzaTech-crypto-tool](https://github.com/Doliman100/ForzaTech-crypto-tool): FH5 and older support is based on his tool
 * **draff** — Original profile-editor reference implementation, FH6 format research, and crypto help
 * **Forza Mods AIO** — Reference for Save Swap Xbox account identification via PeopleHub ([source](https://github.com/ForzaMods/Forza-Mods-AIO/blob/6adf484ec921d0f02145d37483144c9a31ec6124/Forza-Mods-AIO/TabForms/Saveswapper.cs))
 
