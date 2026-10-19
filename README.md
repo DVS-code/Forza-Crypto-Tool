@@ -66,6 +66,7 @@ text, and the tool says so rather than pretending to decrypt them.
 * Automatic backup and one-click restore
 * Works on Steam, cracked, Microsoft Store and **RUNE** builds
 * Optional Xbox gamertag lookup labels discovered XUIDs for multi-account installs
+* Limited to **2 different accounts per 24 hours** — see [Terms of Service](#terms-of-service)
 
 ---
 
@@ -133,6 +134,9 @@ XUID if an account cannot be resolved.
 
 Every replaced file is backed up with a timestamp next to it, and **Restore original** undoes a swap —
 even after restarting the tool. Close the game before swapping, or it will save over the new file.
+
+> **Swap limit:** you can swap saves onto **2 different accounts per 24 hours**. Trying a third account
+> locks you out of save swapping. Read the [Terms of Service](#terms-of-service) before you swap.
 
 **Video guide:** https://youtu.be/7-ChnwC4vTs?si=9shSeTkzTVWxoj0x
 
@@ -347,6 +351,35 @@ asking for help. Find them under **Settings → Logs**.
 * **Doliman100** — [ForzaTech-crypto-tool](https://github.com/Doliman100/ForzaTech-crypto-tool): FH5 and older support is based on his tool
 * **draff** — Original profile-editor reference implementation, FH6 format research, and crypto help
 * **Forza Mods AIO** — Reference for Save Swap Xbox account identification via PeopleHub ([source](https://github.com/ForzaMods/Forza-Mods-AIO/blob/6adf484ec921d0f02145d37483144c9a31ec6124/Forza-Mods-AIO/TabForms/Saveswapper.cs))
+
+---
+
+## Terms of Service
+
+By using ForzaCryptoTool's save swap, you agree to the following.
+
+**Swap limit**
+
+* You can swap saves onto **2 different accounts in any 24-hour period**.
+* Swapping onto one of those same 2 accounts again (for example, to retry a swap) does not count
+  against the limit.
+* Trying to swap onto a **third** account within 24 hours **locks you out** of save swapping. The
+  lockout does not expire on its own.
+* The limit applies per internet connection, not per person or per copy of the tool.
+
+**No commercial use**
+
+* Using this tool to make a profit is **not permitted**. That includes selling swapped saves, selling
+  "modded" or "maxed" saves, or charging other people to swap saves for them.
+* If you swap saves for other people, it counts against **your** limit like any other swap. You get
+  the same 2 accounts per 24 hours as everyone else.
+
+**Lockouts**
+
+* If you are locked out, the tool shows a message with your lockout ID. DM **DVS** on
+  [Discord](https://discord.gg/fh6) with that ID to ask for it to be reset.
+* Swapping for other people is **not a valid reason** to have your lockout ID reset. Lockouts caused
+  by swapping for other people, or by selling swaps or saves, will not be lifted.
 
 ---
 
