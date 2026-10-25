@@ -228,6 +228,8 @@ internal static class CliRunner
         var donor = Path.GetFullPath(o.Positional[0]);
         if (!File.Exists(donor)) { ConsoleHost.Error($"donor not found: {donor}"); return ExitCodes.FileNotFound; }
 
+        bool donorIsFh5 = Fh5SaveSwap.IsFh5Profile(FileDetection.Detect(donor).Legacy);
+
         string? target = o.Get("target", "t");
         if (target is not null)
         {
@@ -236,7 +238,9 @@ internal static class CliRunner
         else
         {
             var wantRune = o.Has("rune");
+
             var candidates = SaveLocator.FindCandidates()
+                .Where(c => c.IsFh5 == donorIsFh5)
                 .Where(c => !wantRune || c.Flavour == SaveLocator.SaveFlavour.Rune)
                 .ToList();
 
@@ -244,7 +248,9 @@ internal static class CliRunner
             {
                 ConsoleHost.Error(wantRune
                     ? "no RUNE save found. Pass --target <path to C_ProfileData> explicitly."
-                    : "no FH6 save found. Pass --target <path to C_ProfileData> explicitly.");
+                    : donorIsFh5
+                        ? "no FH5 save found. Pass --target <path to your .ProfileData> explicitly."
+                        : "no FH6 save found. Pass --target <path to C_ProfileData> explicitly.");
                 return ExitCodes.FileNotFound;
             }
             if (candidates.Count > 1 && !o.Has("yes", "y"))
@@ -284,7 +290,7 @@ internal static class CliRunner
         }
 
         using var backend = new BackendClient();
-        if (await backend.SelectBackendAsync() is null)
+        if (!donorIsFh5 && await backend.SelectBackendAsync() is null)
         {
             ConsoleHost.Error("backend offline — please try again later.");
             return ExitCodes.BackendOffline;
@@ -323,7 +329,7 @@ internal static class CliRunner
         var candidates = SaveLocator.FindCandidates();
         if (candidates.Count == 0)
         {
-            ConsoleHost.Write("No FH6 saves found (looked in Xbox PGS and RUNE locations).");
+            ConsoleHost.Write("No saves found (looked for FH6 in Xbox PGS and RUNE, and FH5 in Steam, OnlineFix and Microsoft Store).");
             return ExitCodes.Success;
         }
         foreach (var c in candidates)
@@ -462,9 +468,9 @@ internal static class CliRunner
         help.AppendLine("  decrypt  <file>      Decrypt a GameDB (.slt), profile save, Method 22 ZIP or config file");
         help.AppendLine("  encrypt  <file>      Re-encrypt an edited file back into a game-loadable one");
         help.AppendLine("  detect   <file...>   Identify files and show what can be done with them");
-        help.AppendLine("  saveswap <donor>     Swap a donor save into your active save slot");
+        help.AppendLine("  saveswap <donor>     Swap a donor save into your active save slot (FH6, or FH5 up to v1.619.349.0)");
         help.AppendLine("  restore  <save>      Undo a save swap from the tool's backups");
-        help.AppendLine("  saves                List detected FH6 saves (Xbox PGS, RUNE, Proton/Wine)");
+        help.AppendLine("  saves                List detected saves (FH6: Xbox PGS, RUNE, Proton/Wine; FH5: Steam, OnlineFix, MS Store)");
         help.AppendLine("  profile-inspect <f>  Validate and summarize decrypted FH6 ProfileData");
         help.AppendLine("  profile-set <f>      Edit a typed FH6 property (--property, --value)");
         help.AppendLine("  profile-xuid <f>     Edit the FH6 account XUID (--xuid)");

@@ -48,7 +48,7 @@ public partial class SaveSwapView : UserControl
         if (_saves.Count > 0)
             SaveList.SelectedIndex = 0;
         else
-            _shell.SetStatus("No Forza Horizon 6 save found automatically.");
+            _shell.SetStatus("No save found automatically.");
     }
 
     private UIElement BuildSaveRow(SaveLocator.Candidate save)
@@ -174,7 +174,7 @@ public partial class SaveSwapView : UserControl
     {
         var dialog = new OpenFileDialog
         {
-            Title = "Choose the save to replace (C_ProfileData)",
+            Title = "Choose the save to replace",
             Filter = "Forza save|C_ProfileData;C_ProfileBackup;*ProfileData;*ProfileBackup|All files|*.*",
         };
         if (dialog.ShowDialog() != true) return;
@@ -261,7 +261,7 @@ public partial class SaveSwapView : UserControl
             Account: {xuidLabel}
 
             A backup of every replaced file is written next to it.
-            Make sure Forza Horizon 6 is closed.
+            Make sure the game is closed.
 
             Continue?
             """,

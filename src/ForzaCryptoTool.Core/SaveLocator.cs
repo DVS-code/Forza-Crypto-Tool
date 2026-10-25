@@ -2,7 +2,7 @@ namespace ForzaCryptoTool;
 
 internal static class SaveLocator
 {
-    public enum SaveFlavour { Pgs, Rune, Proton }
+    public enum SaveFlavour { Pgs, Rune, Proton, Fh5 }
 
     public sealed record Candidate(
         string Path,
@@ -18,6 +18,8 @@ internal static class SaveLocator
             : $"{Size / 1024.0:0.0} KB";
 
         public string ContainerDir => System.IO.Path.GetDirectoryName(Path) ?? "";
+
+        public bool IsFh5 => Flavour == SaveFlavour.Fh5;
     }
 
     public static List<Candidate> FindCandidates()
@@ -27,6 +29,9 @@ internal static class SaveLocator
         {
             TryAdd(found, ScanPgs);
             TryAdd(found, ScanRune);
+            TryAdd(found, ScanFh5Steam);
+            TryAdd(found, ScanFh5OnlineFix);
+            TryAdd(found, ScanFh5MsStore);
         }
         else
         {
@@ -139,6 +144,98 @@ internal static class SaveLocator
         }
     }
 
+    private const string Fh5SteamAppId = "1551360";
+
+    private static IEnumerable<Candidate> ScanFh5Steam()
+    {
+        foreach (var userdata in SteamUserdataRoots())
+            foreach (var steamAccount in SafeDirs(userdata))
+                foreach (var xuidDir in SafeDirs(Path.Combine(steamAccount, Fh5SteamAppId, "remote")))
+                {
+                    var name = Path.GetFileName(xuidDir);
+                    var xuid = name.Length > 0 && name.All(char.IsDigit) ? name : null;
+                    foreach (var save in SafeFiles(xuidDir, "*.ProfileData"))
+                        yield return Fh5Candidate(save, "FH5 / Steam", xuid);
+                }
+    }
+
+    private static IEnumerable<string> SteamUserdataRoots()
+    {
+        var roots = new List<string> { @"C:\Program Files (x86)\Steam" };
+        if (OperatingSystem.IsWindows())
+        {
+            foreach (var (hive, key, value) in new[]
+            {
+                (Microsoft.Win32.Registry.CurrentUser, @"Software\Valve\Steam", "SteamPath"),
+                (Microsoft.Win32.Registry.LocalMachine, @"SOFTWARE\WOW6432Node\Valve\Steam", "InstallPath"),
+                (Microsoft.Win32.Registry.LocalMachine, @"SOFTWARE\Valve\Steam", "InstallPath"),
+            })
+            {
+                try
+                {
+                    if (hive.OpenSubKey(key)?.GetValue(value) is string path && path.Length > 0)
+                        roots.Add(path.Replace('/', '\\'));
+                }
+                catch { }
+            }
+        }
+        return roots
+            .Select(root => Path.Combine(root, "userdata"))
+            .Where(Directory.Exists)
+            .Distinct(StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static IEnumerable<Candidate> ScanFh5OnlineFix()
+    {
+        var root = $@"C:\Users\Public\Documents\OnlineFix\{Fh5SteamAppId}\Saves";
+        foreach (var folder in SafeDirs(root))
+            foreach (var save in SafeFiles(folder, "*.ProfileData"))
+                yield return Fh5Candidate(save, "FH5 / OnlineFix", null);
+    }
+
+    private static IEnumerable<Candidate> ScanFh5MsStore()
+    {
+        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        foreach (var package in new[] { "Microsoft.624F8B84B80_8wekyb3d8bbwe", "Microsoft.SunriseBaseGame_8wekyb3d8bbwe" })
+        {
+            var wgs = Path.Combine(localAppData, "Packages", package, "SystemAppData", "wgs");
+            foreach (var account in SafeDirs(wgs))
+            {
+                if (Path.GetFileName(account).Equals("t", StringComparison.OrdinalIgnoreCase)) continue;
+                foreach (var container in SafeDirs(account))
+                {
+                    var files = SafeFiles(container, "*").ToList();
+                    bool holdsProfile = files
+                        .Where(f => Path.GetFileName(f).StartsWith("container.", StringComparison.OrdinalIgnoreCase))
+                        .Any(f => ContainsAscii(f, "ProfileData"));
+                    if (!holdsProfile) continue;
+
+                    var save = files.OrderByDescending(f => new FileInfo(f).Length).FirstOrDefault();
+                    if (save is not null)
+                        yield return Fh5Candidate(save, "FH5 / Microsoft Store", null);
+                }
+            }
+        }
+    }
+
+    private static Candidate Fh5Candidate(string path, string source, string? xuid)
+    {
+        var info = new FileInfo(path);
+        return new Candidate(info.FullName, source, info.LastWriteTime, info.Length, SaveFlavour.Fh5, xuid);
+    }
+
+    private static bool ContainsAscii(string path, string text)
+    {
+        try
+        {
+            using var stream = File.OpenRead(path);
+            var buffer = new byte[Math.Min(stream.Length, 1 << 20)];
+            int read = stream.Read(buffer, 0, buffer.Length);
+            return buffer.AsSpan(0, read).IndexOf(System.Text.Encoding.ASCII.GetBytes(text)) >= 0;
+        }
+        catch { return false; }
+    }
+
     private static IEnumerable<Candidate> ScanWinePrefixes()
     {
         foreach (var driveC in WineDriveCRoots())
@@ -226,7 +323,13 @@ internal static class SaveLocator
 
     private static IEnumerable<string> SafeDirs(string path)
     {
-        try { return Directory.EnumerateDirectories(path); }
+        try { return Directory.Exists(path) ? Directory.GetDirectories(path) : Array.Empty<string>(); }
+        catch { return Array.Empty<string>(); }
+    }
+
+    private static IEnumerable<string> SafeFiles(string path, string pattern)
+    {
+        try { return Directory.Exists(path) ? Directory.GetFiles(path, pattern) : Array.Empty<string>(); }
         catch { return Array.Empty<string>(); }
     }
 }

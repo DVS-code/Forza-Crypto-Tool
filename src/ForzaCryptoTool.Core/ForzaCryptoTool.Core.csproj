@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>ForzaCryptoTool</RootNamespace>
     <AssemblyName>ForzaCryptoTool.Core</AssemblyName>
-    <Version>3.3.0</Version>
+    <Version>3.3.4</Version>
 
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>

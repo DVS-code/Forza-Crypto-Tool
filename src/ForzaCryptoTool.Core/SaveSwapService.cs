@@ -24,6 +24,16 @@ internal sealed class SaveSwapService
         var steps = new List<Step>();
         try
         {
+            if (File.Exists(donorPath) && Fh5SaveSwap.IsFh5Profile(FileDetection.Detect(donorPath).Legacy))
+                return SwapFh5(donorPath, activePath, targetXuid, steps);
+
+            if (IsFh5SaveName(donorPath) || IsFh5SaveName(activePath))
+            {
+                steps.Add(new Step("Donor", false, "Not a readable FH5 save."));
+                return SwapResult.Fail(steps,
+                    "The donor must be an FH5 save from v1.619.349.0 or earlier. Saves from newer FH5 builds can't be swapped.");
+            }
+
             bool isRune = RuneProfile.IsRunePath(activePath);
             if (isRune && string.IsNullOrWhiteSpace(targetXuid))
             {
@@ -118,6 +128,58 @@ internal sealed class SaveSwapService
         }
     }
 
+    private static SwapResult SwapFh5(string donorPath, string activePath, string? targetXuid, List<Step> steps)
+    {
+        var donor = FileDetection.Detect(donorPath).Legacy!;
+        steps.Add(new Step("Donor", true, $"{LegacyKeyStore.FullName(donor.Context.Game)} save, {new FileInfo(donorPath).Length:N0} bytes"));
+
+        if (!ForzaProfile.TryParseXuid(targetXuid ?? "", out var xuid) || xuid == 0)
+        {
+            steps.Add(new Step("Parse XUID", false, "XUID is empty or invalid."));
+            return SwapResult.Fail(steps, "Enter a valid target XUID.");
+        }
+        steps.Add(new Step("Target XUID", true, $"{xuid} (0x{xuid:X16})"));
+
+        if (!File.Exists(activePath))
+            return SwapResult.Fail(steps, "The active save does not exist.");
+        if (IsContainerProfilePath(activePath))
+        {
+            steps.Add(new Step("Active save", false, "This is a Forza Horizon 6 save."));
+            return SwapResult.Fail(steps, "The donor is an FH5 save, but the selected save is from Forza Horizon 6.");
+        }
+
+        Fh5SaveSwap.Patched patched;
+        try
+        {
+            patched = Fh5SaveSwap.Patch(File.ReadAllBytes(donorPath), xuid);
+        }
+        catch (InvalidDataException ex)
+        {
+            steps.Add(new Step("Patch donor", false, ex.Message));
+            return SwapResult.Fail(steps, ex.Message);
+        }
+        steps.Add(new Step("Patch donor", true, $"XUID changed from {patched.DonorXuid} to {xuid}; re-encrypted and verified"));
+
+        var ticket = FileSafety.BeginBackup(activePath);
+        try
+        {
+            FileSafety.ReplaceWithBackup(activePath, patched.Encrypted);
+        }
+        catch
+        {
+            FileSafety.Restore(ticket);
+            steps.Add(new Step("Rollback", true, $"{Path.GetFileName(activePath)} restored."));
+            throw;
+        }
+        steps.Add(new Step($"Write {Path.GetFileName(activePath)}", true,
+            $"{patched.Encrypted.Length:N0} bytes (backup: {Path.GetFileName(ticket.BackupPath)})"));
+
+        Logger.Success("FH5 save swap completed.");
+        return new SwapResult(true,
+            "Save swap completed. Close FH5 before launching so it doesn't autosave over the new file.",
+            steps, ticket.BackupPath);
+    }
+
     private async Task<(bool Ok, string Detail)> VerifySwapOutputAsync(byte[] reencrypted, ulong expectedXuid)
     {
         var temp = Path.Combine(Path.GetTempPath(), $"fct_verify_{Guid.NewGuid():N}");
@@ -174,7 +236,7 @@ internal sealed class SaveSwapService
 
             Logger.Success($"Restored {restored} profile file(s).");
             return new SwapResult(true,
-                $"Original save restored ({restored} file(s)). Close FH6 before launching.", steps, null);
+                $"Original save restored ({restored} file(s)). Close the game before launching.", steps, null);
         }
         catch (Exception ex)
         {
@@ -224,6 +286,9 @@ internal sealed class SaveSwapService
         .Select(g => g.First())
         .ToList();
     }
+
+    private static bool IsFh5SaveName(string path)
+        => Path.GetFileName(path).EndsWith(".ProfileData", StringComparison.OrdinalIgnoreCase);
 
     private static bool IsContainerProfilePath(string path)
     {

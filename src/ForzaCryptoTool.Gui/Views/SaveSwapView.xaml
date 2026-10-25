@@ -8,7 +8,7 @@
 
             <TextBlock Text="Save Swap" Style="{StaticResource TitleText}" />
             <TextBlock Style="{StaticResource SecondaryText}" Margin="0,4,0,20"
-                       Text="Put a donor save onto your account, keeping its progress." />
+                       Text="Put a donor save onto your account, keeping its progress. Works for FH6, and FH5 up to v1.619.349.0." />
 
             <Border Style="{StaticResource Card}">
                 <StackPanel>
@@ -57,7 +57,7 @@
 
                     <TextBlock x:Name="NoSavesText" Style="{StaticResource SmallText}" Margin="0,12,0,0"
                                Foreground="{StaticResource Warning}" Visibility="Collapsed"
-                               Text="No save found automatically. Use 'Choose manually' to point at your C_ProfileData." />
+                               Text="No save found automatically. Use 'Choose manually' to point at your save file." />
 
                     <WrapPanel Margin="0,12,0,0">
                         <Button Content="Rescan" Style="{StaticResource GhostButton}" Margin="0,0,10,0"
@@ -135,7 +135,7 @@
                 <StackPanel>
 
                     <TextBlock Style="{StaticResource SmallText}"
-                               Text="Close Forza Horizon 6 before swapping, or it will save over the new file." />
+                               Text="Close the game before swapping, or it will save over the new file." />
 
                     <WrapPanel Margin="0,14,0,0">
                         <Button x:Name="SwapButton" Content="Swap save" Style="{StaticResource PrimaryButton}"

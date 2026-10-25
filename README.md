@@ -10,15 +10,16 @@ full command line, and a separate native binary runs the command line on Linux.
 
 ---
 
-## What's new in v3.3
+## What's new in v3.3.4
 
-* **FH5 and older.** Files from FM6 Apex, FH3, FM7, FH4 and FH5 can now be decrypted and
-  re-encrypted — saves, GameDB, loose files and Method 22 ZIPs. These run on your own machine, so no
-  internet connection is needed for them.
-* The game and file type are detected automatically.
-* Based on [Doliman100's ForzaTech-crypto-tool](https://github.com/Doliman100/ForzaTech-crypto-tool).
+* **FH5 save swap.** The Save Swap tab now works for Forza Horizon 5 saves too (up to v1.619.349.0),
+  on Steam, OnlineFix and Microsoft Store. It runs on your own machine, no internet needed.
+* Based on [SaveSwapTool](https://github.com/DVS-code/SaveSwapTool), now built into this tool.
 
-See the [release notes](https://github.com/DVS-code/Forza-Crypto-Tool/releases/tag/V3.3) for the
+v3.3 added decrypt and re-encrypt for FH5 and older, based on
+[Doliman100's ForzaTech-crypto-tool](https://github.com/Doliman100/ForzaTech-crypto-tool).
+
+See the [release notes](https://github.com/DVS-code/Forza-Crypto-Tool/releases/tag/V3.3.4) for the
 full list of changes.
 
 ---
@@ -65,8 +66,8 @@ text, and the tool says so rather than pretending to decrypt them.
 * Single-field XUID swap, so full progression transfers
 * Automatic backup and one-click restore
 * Works on Steam, cracked, Microsoft Store and **RUNE** builds
+* FH5 saves too, up to v1.619.349.0
 * Optional Xbox gamertag lookup labels discovered XUIDs for multi-account installs
-* Limited to **2 different accounts per 24 hours** — see [Terms of Service](#terms-of-service)
 
 ---
 
@@ -128,15 +129,15 @@ Saves are detected automatically for:
 
 RUNE uses one fixed account on every install, so the XUID is filled in for you there.
 
+**FH5** saves are listed too — Steam, OnlineFix and Microsoft Store. Pick your FH5 save, choose an FH5
+donor (v1.619.349.0 or earlier) and swap. This runs on your machine and needs no internet connection.
+
 Use **Identify accounts** to label discovered Xbox save accounts as `Gamertag · XUID`. The lookup uses
 the currently signed-in Xbox App session, keeps its token in memory only, and falls back to the numeric
 XUID if an account cannot be resolved.
 
 Every replaced file is backed up with a timestamp next to it, and **Restore original** undoes a swap —
 even after restarting the tool. Close the game before swapping, or it will save over the new file.
-
-> **Swap limit:** you can swap saves onto **2 different accounts per 24 hours**. Trying a third account
-> locks you out of save swapping. Read the [Terms of Service](#terms-of-service) before you swap.
 
 **Video guide:** https://youtu.be/7-ChnwC4vTs?si=9shSeTkzTVWxoj0x
 
@@ -247,6 +248,7 @@ WPF has no Linux runtime.
 | GameDB re-encrypt | ✅ |
 | Profile decrypt / re-encrypt | ✅ |
 | Save Swap (incl. RUNE) | ✅ |
+| FH5 Save Swap | ✅ |
 | Command line (Windows + Linux) | ✅ |
 | FH6 Profile Editor | ✅ |
 | Older ForzaTech (FM6 Apex / FH3 / FM7 / FH4 / FH5) decrypt / re-encrypt | ✅ |
@@ -348,38 +350,10 @@ asking for help. Find them under **Settings → Logs**.
 * **DVS** — Method 22 crypto, profile crypto, save swap system, and tool development — [youtube.com/@dvssquad](https://www.youtube.com/@dvssquad)
 * **xxd20xxx** — GameDB and SFS crypto research
 * **Ariza** — Save swap assistance
+* **SaveSwapTool** — [the original FH5 save swap tool](https://github.com/DVS-code/SaveSwapTool), now built in
 * **Doliman100** — [ForzaTech-crypto-tool](https://github.com/Doliman100/ForzaTech-crypto-tool): FH5 and older support is based on his tool
 * **draff** — Original profile-editor reference implementation, FH6 format research, and crypto help
 * **Forza Mods AIO** — Reference for Save Swap Xbox account identification via PeopleHub ([source](https://github.com/ForzaMods/Forza-Mods-AIO/blob/6adf484ec921d0f02145d37483144c9a31ec6124/Forza-Mods-AIO/TabForms/Saveswapper.cs))
-
----
-
-## Terms of Service
-
-By using ForzaCryptoTool's save swap, you agree to the following.
-
-**Swap limit**
-
-* You can swap saves onto **2 different accounts in any 24-hour period**.
-* Swapping onto one of those same 2 accounts again (for example, to retry a swap) does not count
-  against the limit.
-* Trying to swap onto a **third** account within 24 hours **locks you out** of save swapping. The
-  lockout does not expire on its own.
-* The limit applies per internet connection, not per person or per copy of the tool.
-
-**No commercial use**
-
-* Using this tool to make a profit is **not permitted**. That includes selling swapped saves, selling
-  "modded" or "maxed" saves, or charging other people to swap saves for them.
-* If you swap saves for other people, it counts against **your** limit like any other swap. You get
-  the same 2 accounts per 24 hours as everyone else.
-
-**Lockouts**
-
-* If you are locked out, the tool shows a message with your lockout ID. DM **DVS** on
-  [Discord](https://discord.gg/fh6) with that ID to ask for it to be reset.
-* Swapping for other people is **not a valid reason** to have your lockout ID reset. Lockouts caused
-  by swapping for other people, or by selling swaps or saves, will not be lifted.
 
 ---
 
