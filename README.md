@@ -10,16 +10,17 @@ full command line, and a separate native binary runs the command line on Linux.
 
 ---
 
-## What's new in v3.3.4
+## What's new in v3.3.5
 
-* **FH5 save swap.** The Save Swap tab now works for Forza Horizon 5 saves too (up to v1.619.349.0),
-  on Steam, OnlineFix and Microsoft Store. It runs on your own machine, no internet needed.
-* Based on [SaveSwapTool](https://github.com/DVS-code/SaveSwapTool), now built into this tool.
+* **FH5 v1.688.109.0.** Saves, GameDB, loose files such as `PhysicsSettings.ini`, and Method 22 asset
+  ZIPs from the latest FH5 build now decrypt and re-encrypt, offline.
+* **FH5 save swap** now accepts v1.688.109.0 donor saves.
 
+v3.3.4 added FH5 save swap, based on [SaveSwapTool](https://github.com/DVS-code/SaveSwapTool).
 v3.3 added decrypt and re-encrypt for FH5 and older, based on
 [Doliman100's ForzaTech-crypto-tool](https://github.com/Doliman100/ForzaTech-crypto-tool).
 
-See the [release notes](https://github.com/DVS-code/Forza-Crypto-Tool/releases/tag/V3.3.4) for the
+See the [release notes](https://github.com/DVS-code/Forza-Crypto-Tool/releases/tag/V3.3.5) for the
 full list of changes.
 
 ---
@@ -31,7 +32,7 @@ full list of changes.
 Decrypt and re-encrypt files from **FM6 Apex, FH3, FM7, FH4 and FH5**: saves, GameDB, loose files
 such as `PhysicsSettings.ini`, and Method 22 asset ZIPs. This runs on your machine and works offline.
 
-FH5 is supported up to build 1.619.349.0. Based on Doliman100's ForzaTech-crypto-tool.
+FH5 is supported up to build 1.688.109.0. Based on Doliman100's ForzaTech-crypto-tool.
 
 ### Config .ini files
 
@@ -66,7 +67,7 @@ text, and the tool says so rather than pretending to decrypt them.
 * Single-field XUID swap, so full progression transfers
 * Automatic backup and one-click restore
 * Works on Steam, cracked, Microsoft Store and **RUNE** builds
-* FH5 saves too, up to v1.619.349.0
+* FH5 saves too, up to v1.688.109.0
 * Optional Xbox gamertag lookup labels discovered XUIDs for multi-account installs
 * Limited to **2 different accounts per 24 hours** — see [Terms of Service](#terms-of-service)
 
@@ -131,7 +132,7 @@ Saves are detected automatically for:
 RUNE uses one fixed account on every install, so the XUID is filled in for you there.
 
 **FH5** saves are listed too — Steam, OnlineFix and Microsoft Store. Pick your FH5 save, choose an FH5
-donor (v1.619.349.0 or earlier) and swap. This runs on your machine and needs no internet connection.
+donor (v1.688.109.0 or earlier) and swap. This runs on your machine and needs no internet connection.
 
 Use **Identify accounts** to label discovered Xbox save accounts as `Gamertag · XUID`. The lookup uses
 the currently signed-in Xbox App session, keeps its token in memory only, and falls back to the numeric
@@ -200,7 +201,7 @@ ForzaCryptoTool profile-sql C_ProfileData_decrypted.bin --sql "SELECT * FROM Dat
 |---|---|
 | `-o, --output <path>` | Output file, or a directory to use the default name |
 | `--original <file>` | The original **encrypted** file (needed for config / Method 22 re-encrypt) |
-| `-g, --game <name>` | Encrypt for FH5 or older: `FH5`, `FH5_v1.614.70.0`, `FH5_v1.619.349.0`, `FH4`, `FM7`, `FH3`, `FH3Dev`, `FM6Apex` |
+| `-g, --game <name>` | Encrypt for FH5 or older: `FH5`, `FH5_v1.614.70.0`, `FH5_v1.619.349.0`, `FH5_v1.688.109.0`, `FH4`, `FM7`, `FH3`, `FH3Dev`, `FM6Apex` |
 | `-k, --key <type>` | With `--game`, override the detected key type |
 | `--target <path>` | Save-swap destination (a `C_ProfileData` path) |
 | `--rune` | Target the RUNE save; its XUID is filled in automatically |
