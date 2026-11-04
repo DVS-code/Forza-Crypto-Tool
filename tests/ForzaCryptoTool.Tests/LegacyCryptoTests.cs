@@ -29,8 +29,9 @@ public sealed class LegacyCryptoTests
     public void Key_store_carries_every_CryptoTool_context()
     {
         var contexts = LegacyKeyStore.Contexts;
-        Assert.Equal(35, contexts.Count);
-        Assert.Equal(8, contexts.Select(c => c.Game).Distinct().Count());
+        Assert.Equal(38, contexts.Count);
+        Assert.Equal(9, contexts.Select(c => c.Game).Distinct().Count());
+        Assert.Equal(Enum.GetValues<LegacyGame>().Order(), LegacyKeyStore.ReleaseOrder.Order());
 
         Assert.All(contexts, c => Assert.Equal(
             c.Game is LegacyGame.FM7 or LegacyGame.FM6Apex ? LegacyContainer.Motorsport : LegacyContainer.Horizon,
@@ -39,6 +40,25 @@ public sealed class LegacyCryptoTests
         Assert.All(contexts, c => Assert.Equal(c.KeyType == LegacyKeyType.GameDB, c.Scramble is not null));
         Assert.All(contexts, c => Assert.Equal(
             c.KeyType is LegacyKeyType.GameDB or LegacyKeyType.SFS ? 0x20000 : 0x200, c.BlockSize));
+    }
+
+    [Theory]
+    [InlineData("Profile", "Decryption", "aGwqoFzZ3toT1l8m3q3kog==", "+aRV+sS3ybkDcJ8jICHrQw==")]
+    [InlineData("Profile", "Mac", "aGwqoFzZ3toT1l8m3q3kog==", "3cNfXECXSosjqguwNu4v2A==")]
+    [InlineData("GameDB", "Decryption", "AAECAwQFBgcICQoLDA0ODw==", "2J7CONBrZVn1vdWtuEakzg==")]
+    [InlineData("GameDB", "Mac", "Z6vdchAk8P9OCz9ML8E7xQ==", "TlOXePXINZ9JErhG0oKSoQ==")]
+    [InlineData("File", "Decryption", "AAECAwQFBgcICQoLDA0ODw==", "YUpblwdLeONuRyjb+GR49Q==")]
+    [InlineData("File", "Mac", "AAECAwQFBgcICQoLDA0ODw==", "Q/5CECObuq9lL9oMXoIKNQ==")]
+    public void Fh5_v1688_keys_match_the_extracted_vectors(string keyType, string cipher, string input, string expected)
+    {
+        var context = Context("FH5_v1.688.109.0", keyType);
+        var output = new byte[16];
+        if (cipher == "Mac")
+            context.Tables.Mac.ProcessBlock(context.MacKeys, Convert.FromBase64String(input), output);
+        else
+            context.Tables.Decryption.ProcessBlock(context.DecryptionKeys, Convert.FromBase64String(input), output);
+        Assert.Equal(Convert.FromBase64String(expected), output);
+        Assert.Same(LegacyKeyStore.Find(LegacyGame.FH4, LegacyKeyType.File)!.Tables, context.Tables);
     }
 
     [Fact]

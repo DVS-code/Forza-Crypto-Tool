@@ -8,7 +8,7 @@
 
             <TextBlock Text="Save Swap" Style="{StaticResource TitleText}" />
             <TextBlock Style="{StaticResource SecondaryText}" Margin="0,4,0,20"
-                       Text="Put a donor save onto your account, keeping its progress. Works for FH6, and FH5 up to v1.619.349.0." />
+                       Text="Put a donor save onto your account, keeping its progress. Works for FH6, and FH5 up to v1.688.109.0." />
 
             <Border Style="{StaticResource Card}">
                 <StackPanel>

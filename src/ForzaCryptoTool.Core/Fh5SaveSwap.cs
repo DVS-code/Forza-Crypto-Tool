@@ -7,7 +7,7 @@ internal static class Fh5SaveSwap
     public static bool IsFh5Profile(LegacyFileInfo? info)
         => info is not null
         && info.Context.KeyType == LegacyKeyType.Profile
-        && info.Context.Game is LegacyGame.FH5 or LegacyGame.FH5_v1_619_349_0;
+        && info.Context.Game is LegacyGame.FH5 or LegacyGame.FH5_v1_619_349_0 or LegacyGame.FH5_v1_688_109_0;
 
     public static int FindXuidOffset(ReadOnlySpan<byte> plain)
     {
@@ -43,7 +43,7 @@ internal static class Fh5SaveSwap
         var donor = LegacyCrypto.TryDecrypt(donorEncrypted);
         if (donor is null || !IsFh5Profile(donor.Info))
             throw new InvalidDataException(
-                "The donor isn't a supported FH5 save. FH5 saves up to v1.619.349.0 can be swapped.");
+                "The donor isn't a supported FH5 save. FH5 saves up to v1.688.109.0 can be swapped.");
         if (donor.BadBlockMacs > 0)
             throw new InvalidDataException("The donor save is damaged (its block MACs don't verify).");
 
@@ -59,8 +59,9 @@ internal static class Fh5SaveSwap
         ulong donorXuid = BinaryPrimitives.ReadUInt64LittleEndian(current);
         BinaryPrimitives.WriteUInt64LittleEndian(plain.AsSpan(offset), targetXuid);
 
-        var context = LegacyKeyStore.Find(LegacyGame.FH5, LegacyKeyType.Profile)!;
-        var encrypted = LegacyCrypto.Encrypt(plain, context, new byte[16]);
+        bool keepOwnKey = donor.Info.Context.Game == LegacyGame.FH5_v1_688_109_0;
+        var context = keepOwnKey ? donor.Info.Context : LegacyKeyStore.Find(LegacyGame.FH5, LegacyKeyType.Profile)!;
+        var encrypted = LegacyCrypto.Encrypt(plain, context, keepOwnKey ? donor.Info.Iv : new byte[16]);
 
         var check = LegacyCrypto.TryDecrypt(encrypted);
         if (check is null || check.BadBlockMacs > 0 || !check.Plaintext.AsSpan().SequenceEqual(plain))

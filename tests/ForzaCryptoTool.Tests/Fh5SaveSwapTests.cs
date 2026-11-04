@@ -70,6 +70,22 @@ public sealed class Fh5SaveSwapTests
     }
 
     [Fact]
+    public void V1688_donor_keeps_its_own_key_and_iv()
+    {
+        var plain = BuildPlaintext(DonorXuid);
+        var context = LegacyKeyStore.Find(LegacyGame.FH5_v1_688_109_0, LegacyKeyType.Profile)!;
+        var iv = LegacyCrypto.RandomIv();
+        var donor = LegacyCrypto.Encrypt(plain, context, iv);
+
+        var patched = Fh5SaveSwap.Patch(donor, TargetXuid);
+        var result = LegacyCrypto.TryDecrypt(patched.Encrypted)!;
+        Assert.Equal(LegacyGame.FH5_v1_688_109_0, result.Info.Context.Game);
+        Assert.Equal(iv, result.Info.Iv);
+        Assert.Equal(0, result.BadBlockMacs);
+        Assert.Equal(BuildPlaintext(TargetXuid), result.Plaintext);
+    }
+
+    [Fact]
     public void Ambiguous_xuid_is_refused()
     {
         var plain = BuildPlaintext(DonorXuid);

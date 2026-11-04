@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace ForzaCryptoTool;
 
-internal enum LegacyGame { FH5_v1_619_349_0, FH5_v1_614_70_0, FH5, FH4, FM7, FH3Dev, FH3, FM6Apex }
+internal enum LegacyGame { FH5_v1_619_349_0, FH5_v1_614_70_0, FH5, FH4, FM7, FH3Dev, FH3, FM6Apex, FH5_v1_688_109_0 }
 
 internal enum LegacyKeyType { Profile, Reward, GameDB, ConfigFile, File, SFS, Photo, Dynamic }
 
@@ -64,6 +64,12 @@ internal static class LegacyKeyStore
 
     public static IReadOnlyList<LegacyContext> Contexts => Loaded.Value;
 
+    public static IReadOnlyList<LegacyGame> ReleaseOrder { get; } = new[]
+    {
+        LegacyGame.FM6Apex, LegacyGame.FH3, LegacyGame.FH3Dev, LegacyGame.FM7, LegacyGame.FH4,
+        LegacyGame.FH5, LegacyGame.FH5_v1_614_70_0, LegacyGame.FH5_v1_619_349_0, LegacyGame.FH5_v1_688_109_0,
+    };
+
     public static LegacyContext? Find(LegacyGame game, LegacyKeyType keyType)
         => Contexts.FirstOrDefault(c => c.Game == game && c.KeyType == keyType);
 
@@ -77,6 +83,7 @@ internal static class LegacyKeyStore
 
     public static string ShortName(LegacyGame game) => game switch
     {
+        LegacyGame.FH5_v1_688_109_0 => "FH5_v1.688.109.0",
         LegacyGame.FH5_v1_619_349_0 => "FH5_v1.619.349.0",
         LegacyGame.FH5_v1_614_70_0 => "FH5_v1.614.70.0",
         _ => game.ToString(),
@@ -84,6 +91,7 @@ internal static class LegacyKeyStore
 
     public static string FullName(LegacyGame game) => game switch
     {
+        LegacyGame.FH5_v1_688_109_0 => "Forza Horizon 5 v1.688.109.0",
         LegacyGame.FH5_v1_619_349_0 => "Forza Horizon 5 v1.619.349.0",
         LegacyGame.FH5_v1_614_70_0 => "Forza Horizon 5 v1.614.70.0",
         LegacyGame.FH5 => "Forza Horizon 5",

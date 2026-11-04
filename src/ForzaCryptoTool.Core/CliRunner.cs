@@ -183,7 +183,7 @@ internal static class CliRunner
     }
 
     private static string LegacyGameList()
-        => string.Join(", ", Enum.GetValues<LegacyGame>().Reverse().Select(LegacyKeyStore.ShortName));
+        => string.Join(", ", LegacyKeyStore.ReleaseOrder.Select(LegacyKeyStore.ShortName));
 
     private static int Detect(CliOptions o)
     {
@@ -468,7 +468,7 @@ internal static class CliRunner
         help.AppendLine("  decrypt  <file>      Decrypt a GameDB (.slt), profile save, Method 22 ZIP or config file");
         help.AppendLine("  encrypt  <file>      Re-encrypt an edited file back into a game-loadable one");
         help.AppendLine("  detect   <file...>   Identify files and show what can be done with them");
-        help.AppendLine("  saveswap <donor>     Swap a donor save into your active save slot (FH6, or FH5 up to v1.619.349.0)");
+        help.AppendLine("  saveswap <donor>     Swap a donor save into your active save slot (FH6, or FH5 up to v1.688.109.0)");
         help.AppendLine("  restore  <save>      Undo a save swap from the tool's backups");
         help.AppendLine("  saves                List detected saves (FH6: Xbox PGS, RUNE, Proton/Wine; FH5: Steam, OnlineFix, MS Store)");
         help.AppendLine("  profile-inspect <f>  Validate and summarize decrypted FH6 ProfileData");

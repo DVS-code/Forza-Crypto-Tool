@@ -31,7 +31,7 @@ internal sealed class SaveSwapService
             {
                 steps.Add(new Step("Donor", false, "Not a readable FH5 save."));
                 return SwapResult.Fail(steps,
-                    "The donor must be an FH5 save from v1.619.349.0 or earlier. Saves from newer FH5 builds can't be swapped.");
+                    "The donor must be an FH5 save from v1.688.109.0 or earlier. Saves from newer FH5 builds can't be swapped.");
             }
 
             bool isRune = RuneProfile.IsRunePath(activePath);

@@ -33,8 +33,8 @@ public partial class DashboardView : UserControl
         var games = new List<GameChoice> { new(null, "Forza Horizon 6") };
         games.AddRange(new[]
             {
-                LegacyGame.FH5, LegacyGame.FH5_v1_614_70_0, LegacyGame.FH5_v1_619_349_0, LegacyGame.FH4,
-                LegacyGame.FM7, LegacyGame.FH3, LegacyGame.FH3Dev, LegacyGame.FM6Apex,
+                LegacyGame.FH5, LegacyGame.FH5_v1_614_70_0, LegacyGame.FH5_v1_619_349_0, LegacyGame.FH5_v1_688_109_0,
+                LegacyGame.FH4, LegacyGame.FM7, LegacyGame.FH3, LegacyGame.FH3Dev, LegacyGame.FM6Apex,
             }
             .Select(game => new GameChoice(game, LegacyKeyStore.FullName(game))));
         GameCombo.ItemsSource = games;
